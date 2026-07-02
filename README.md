@@ -35,6 +35,16 @@ W trakcie: migracja do React Native, integracja Tor i Signal Protocol.
 
 https://illustrious-alfajores-8c81a8.netlify.app
 
-## Licencja
+## Licencja / License
 
-MIT
+**PL:** Phantom jest dostępny bezpłatnie do użytku osobistego, edukacyjnego
+i niekomercyjnego na licencji [PolyForm Noncommercial 1.0.0](LICENSE).
+Możesz kod czytać, forkować i modyfikować za darmo. Użycie komercyjne
+(sprzedaż, oferowanie jako płatna usługa, wbudowanie w produkt zarobkowy)
+wymaga osobnej licencji komercyjnej — szczegóły w [COMMERCIAL-LICENSE.md](COMMERCIAL-LICENSE.md).
+
+**EN:** Phantom is free to use for personal, educational, and noncommercial
+purposes under the [PolyForm Noncommercial License 1.0.0](LICENSE).
+You may read, fork, and modify the code at no cost. Commercial use
+(selling, offering as a paid service, embedding in a for-profit product)
+requires a separate commercial license — see [COMMERCIAL-LICENSE.md](COMMERCIAL-LICENSE.md).
