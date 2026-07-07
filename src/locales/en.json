@@ -1,0 +1,336 @@
+{
+  "language": {
+    "label": "language"
+  },
+  "brand": {
+    "tagline": "p2p · tor · e2e"
+  },
+  "boot": {
+    "steps": [
+      "initializing tor...",
+      "generating .onion...",
+      "x3dh key exchange...",
+      "verifying identity...",
+      "connection established"
+    ]
+  },
+  "torStatus": {
+    "connected": "TOR: active",
+    "connecting": "TOR: connecting...",
+    "error": "TOR: error"
+  },
+  "qr": {
+    "title": "YOUR ADDRESS",
+    "yourName": "your name",
+    "nameValue": "my_contact",
+    "torAddress": "tor address",
+    "hint": "show this QR to be added as a contact. the address does not reveal your location."
+  },
+  "addContact": {
+    "title": "add contact",
+    "subtitleForm": "enter the .onion address",
+    "subtitleVerify": "verifying over tor...",
+    "subtitleDone": "contact added",
+    "onionLabel": ".ONION ADDRESS *",
+    "onionPlaceholder": "e.g. x7wqibd4zmbxojl5.onion",
+    "nameLabel": "CONTACT NAME",
+    "namePlaceholder": "e.g. John Smith",
+    "nameHint": "if empty — we'll use a fragment of the address",
+    "howToTitle": "HOW TO GET THE ADDRESS",
+    "howToBullets": [
+      "· ask the contact to show their QR",
+      "· scan the QR or type the address manually",
+      "· a .onion address never reveals your location"
+    ],
+    "cancel": "CANCEL",
+    "connect": "CONNECT OVER TOR",
+    "connectingTo": "connecting to",
+    "verifySteps": [
+      "establishing tor connection",
+      "x3dh key exchange",
+      "verifying node identity",
+      "initializing signal protocol"
+    ],
+    "doneSubtitle": "contact added · connection active",
+    "torAddress": "tor address",
+    "trust": "trust",
+    "trustDirect": "direct",
+    "protocol": "protocol",
+    "protocolValue": "signal + tor",
+    "goToChat": "GO TO CONVERSATION",
+    "errEmpty": "enter a .onion address",
+    "errNotOnion": "the address must end with .onion",
+    "errTooShort": "the address is too short"
+  },
+  "privateChat": {
+    "title": "private conversation",
+    "subtitle": "1:1 channel outside the group",
+    "contact": "contact",
+    "torAddress": "tor address",
+    "trust": "trust",
+    "trustDirect": "direct",
+    "trustIndirect": "indirect",
+    "context": "context",
+    "whatItMeans": "WHAT THIS MEANS",
+    "bullets": [
+      "· a new Tor channel directly to {{name}}",
+      "· the rest of the group can't see this conversation",
+      "· the rest of the group doesn't know you're talking",
+      "· separate Signal Protocol keys"
+    ],
+    "cancel": "CANCEL",
+    "open": "OPEN PRIVATE CHANNEL"
+  },
+  "nick": {
+    "title": "Private conversation"
+  },
+  "message": {
+    "deleted": "deleted",
+    "deletedInline": "[message deleted]",
+    "ephemeral": "ephemeral · {{time}}",
+    "unitS": "{{s}}s",
+    "unitMS": "{{m}}m {{s}}s",
+    "unitH": "{{h}}h"
+  },
+  "photo": {
+    "steps": [
+      "removing GPS metadata",
+      "removing device data",
+      "re-compressing image",
+      "Signal encryption"
+    ],
+    "headerPreview": "PREVIEW",
+    "headerProcessing": "SANITIZING...",
+    "headerReady": "READY TO SEND",
+    "overlaySanitizing": "SANITIZING",
+    "exifRemoved": "EXIF removed",
+    "willRemoveTitle": "WILL BE REMOVED BEFORE SENDING",
+    "willRemoveBullets": [
+      "· GPS and location from EXIF",
+      "· camera model and serial number",
+      "· date and time the photo was taken",
+      "· thumbnail and other metadata"
+    ],
+    "cancel": "CANCEL",
+    "sanitizeAndSend": "SANITIZE AND SEND",
+    "sendEncrypted": "SEND ENCRYPTED",
+    "msgCaption": "e2e · exif removed",
+    "fullscreenCaption": "encrypted · metadata removed"
+  },
+  "torNodes": {
+    "roles": ["Entry Guard", "Middle Relay", "Exit Relay"]
+  },
+  "e2e": {
+    "title": "end-to-end encryption",
+    "subtitle": "signal protocol · double ratchet",
+    "verifiedStatus": "key verified in person",
+    "notVerifiedStatus": "key not verified",
+    "verifiedDesc": "the conversation is secure. no one is in the middle.",
+    "notVerifiedDesc": "compare the fingerprint with your contact in person or via another channel.",
+    "contactFallback": "contact",
+    "fingerprintOf": "FINGERPRINT — {{name}}",
+    "copied": "copied!",
+    "copyFp": "copy fingerprint",
+    "yourFingerprint": "YOUR FINGERPRINT",
+    "howToTitle": "HOW TO VERIFY",
+    "howToSteps": [
+      "1. ask {{name}} to read out their fingerprint",
+      "2. compare it with what you see above",
+      "3. if identical — confirm below",
+      "4. if different — someone may be in the middle"
+    ],
+    "grid": {
+      "protocol": "protocol",
+      "protocolValue": "Signal Protocol",
+      "keyExchange": "key exchange",
+      "keyExchangeValue": "X3DH + Curve25519",
+      "cipher": "cipher",
+      "cipherValue": "AES-256-GCM",
+      "forwardSecrecy": "forward secrecy",
+      "forwardSecrecyValue": "Double Ratchet"
+    },
+    "close": "CLOSE",
+    "unverify": "UNDO VERIFICATION",
+    "confirmVerify": "I CONFIRM — KEY MATCHES"
+  },
+  "torModal": {
+    "title": "tor network status",
+    "subtitle": "3-node circuit · onion routing",
+    "active": "TOR ACTIVE",
+    "totalLatency": "total latency:",
+    "circuitId": "CIRCUIT ID",
+    "circuitNodes": "CIRCUIT NODES",
+    "you": "YOU",
+    "targetFallback": "target",
+    "whatEachSees": "WHAT EACH NODE SEES",
+    "seesRows": [
+      { "label": "node 1 (entry)", "value": "knows your IP,  does NOT know the recipient or content" },
+      { "label": "node 2 (middle)", "value": "knows NEITHER the sender nor the recipient" },
+      { "label": "node 3 (exit)", "value": "knows the recipient (.onion),  does NOT know your IP" }
+    ],
+    "target": "CONNECTION TARGET",
+    "hiddenServiceAddr": "hidden service address",
+    "na": "n/a",
+    "close": "CLOSE",
+    "building": "building a new circuit...",
+    "newCircuit": "NEW TOR CIRCUIT"
+  },
+  "chat": {
+    "emptyTitle": "select a contact or group",
+    "emptySubtitle": "all connections over tor",
+    "privateBadge": "PRIVATE",
+    "membersEpoch": "{{count}} members · epoch={{epoch}}",
+    "privateChannel": "private channel · {{onion}}",
+    "titleE2E": "E2E encryption status",
+    "titleTor": "Tor network status",
+    "titleInfo": "Details",
+    "titleClosePanel": "Close panel",
+    "titleOpenPanel": "Open panel",
+    "privBanner": "invisible to the other members · {{group}}",
+    "emptyPriv": "start a private conversation",
+    "emptyMsgs": "no messages",
+    "ttlLabel": "lifetime:",
+    "cameraTitle": "Send a photo (EXIF will be removed)",
+    "placeholderPriv": "private message...",
+    "placeholderEph": "ephemeral message...",
+    "placeholderNormal": "message..."
+  },
+  "group": {
+    "visibility": {
+      "HIDDEN":  { "label": "Hidden",  "desc": "Invisible on the network. Only invited people know it exists." },
+      "PRIVATE": { "label": "Private", "desc": "Existence visible on the network, content and members encrypted." },
+      "PUBLIC":  { "label": "Public",  "desc": "Any node on the network can find it and request to join." }
+    },
+    "invite": {
+      "FOUNDER_ONLY": { "label": "Founder only", "desc": "The only person able to invite new members." },
+      "ADMINS_ONLY":  { "label": "Admins",       "desc": "All group admins can invite." },
+      "ANY_MEMBER":   { "label": "Any member",   "desc": "Any participant can invite their contacts." }
+    },
+    "ttl": {
+      "off":   { "label": "Disabled", "desc": "Messages do not disappear automatically." },
+      "60":    { "label": "1 minute", "desc": "All messages disappear after 1 min." },
+      "300":   { "label": "5 minutes","desc": "All messages disappear after 5 min." },
+      "3600":  { "label": "1 hour",   "desc": "All messages disappear after 1h." },
+      "86400": { "label": "24 hours", "desc": "All messages disappear after 24h." }
+    }
+  },
+  "createGroup": {
+    "title": "new group",
+    "stepOf": "step {{step}} of 3",
+    "nameLabel": "GROUP NAME",
+    "namePlaceholder": "e.g. project_alpha",
+    "nameErr": "enter a group name",
+    "nameHint": "name visible only to group members",
+    "cancel": "CANCEL",
+    "next": "NEXT →",
+    "back": "← BACK",
+    "visibility": "GROUP VISIBILITY",
+    "whoCanInvite": "WHO CAN INVITE",
+    "forcedTTL": "FORCED MESSAGE DISAPPEARANCE",
+    "selectMembers": "SELECT MEMBERS",
+    "selectedCount": "({{count}} selected)",
+    "summaryName": "name",
+    "summaryVisibility": "visibility",
+    "summaryInvite": "invites",
+    "summaryTTL": "disappearing",
+    "create": "CREATE GROUP"
+  },
+  "editGroup": {
+    "title": "group settings",
+    "subtitle": "{{name}} · only you can see this",
+    "nameLabel": "GROUP NAME",
+    "nameErr": "enter a group name",
+    "visibility": "GROUP VISIBILITY",
+    "whoCanInvite": "WHO CAN INVITE",
+    "forcedTTL": "FORCED MESSAGE DISAPPEARANCE",
+    "rememberTitle": "REMEMBER",
+    "rememberDesc": "changing visibility does not remove information other nodes on the network have already seen. hiding a group only works fully when applied from the start.",
+    "cancel": "CANCEL",
+    "save": "SAVE SETTINGS"
+  },
+  "sidebar": {
+    "expandPanel": "Expand panel",
+    "collapsePanel": "Collapse panel",
+    "tabContacts": "CONTACTS",
+    "tabGroups": "GROUPS",
+    "titleQR": "Your QR",
+    "titleAddContact": "Add contact",
+    "titleCreateGroup": "Create group",
+    "membersShort": "{{count}} ppl",
+    "founder": "founder",
+    "addContact": "ADD CONTACT",
+    "createGroup": "CREATE GROUP"
+  },
+  "infoPanel": {
+    "members": "MEMBERS",
+    "details": "DETAILS",
+    "titleGroupSettings": "Group settings",
+    "titleClosePanel": "Close panel",
+    "selectHint1": "select a contact",
+    "selectHint2": "or a group",
+    "invites": "invites: {{policy}}",
+    "disappear": "disappearing: {{ttl}}",
+    "epochMembers": "epoch={{epoch}} · {{count}} ppl",
+    "editSettings": "EDIT SETTINGS",
+    "memberHint": "click a member or their nick to open a private conversation",
+    "privateChannel": "PRIVATE CHANNEL",
+    "invisibleForGroup": "invisible to the group",
+    "trustDirect": "● trusted directly",
+    "trustIndirect": "◐ trusted indirectly",
+    "status": "STATUS",
+    "online": "online",
+    "lastSeen": "last seen {{time}}",
+    "encryption": "ENCRYPTION",
+    "encryptionList": ["· signal protocol", "· double ratchet", "· forward secrecy", "· tor hidden service"],
+    "torAddress": "TOR ADDRESS",
+    "rememberTitle": "REMEMBER",
+    "rememberDesc": "encryption protects content. device security is up to you."
+  },
+  "memberBtn": {
+    "title": "Open private conversation",
+    "online": "online"
+  },
+  "nav": {
+    "contacts": "Contacts",
+    "groups": "Groups",
+    "add": "Add",
+    "newGroup": "New grp",
+    "qr": "QR"
+  },
+  "drawer": {
+    "invites": "invites: {{policy}}",
+    "disappear": "disappearing: {{ttl}}",
+    "editSettings": "EDIT SETTINGS",
+    "members": "MEMBERS",
+    "memberHint": "tap a member to open a private conversation",
+    "privateChannel": "PRIVATE CHANNEL",
+    "invisibleForGroup": "invisible to the group",
+    "status": "status",
+    "lastSeenShort": "last {{time}}",
+    "trust": "trust",
+    "trustDirect": "direct",
+    "trustIndirect": "indirect",
+    "torAddress": "TOR ADDRESS",
+    "encryption": "ENCRYPTION",
+    "encryptionList": ["signal protocol", "double ratchet", "forward secrecy", "tor hidden service"]
+  },
+  "demo": {
+    "now": "now",
+    "ago2h": "2h ago",
+    "msg": {
+      "a1b2c3_1": "connection established",
+      "a1b2c3_2": "confirmed. keys OK",
+      "a1b2c3_3": "this message will disappear in 5min",
+      "a1b2c3_4": "forward secrecy active",
+      "d4e5f6_1": "bootstrap via node B OK",
+      "d4e5f6_2": "i see 6 nodes on the network",
+      "grp_001_1": "group key epoch=3 active",
+      "grp_001_2": "rotation confirmed",
+      "grp_001_3": "operation log sync OK",
+      "grp_001_4": "nodes synchronized",
+      "grp_001_5": "i see 4 active participants",
+      "grp_002_1": "checking connection",
+      "grp_002_2": "OK, i'm here"
+    }
+  }
+}

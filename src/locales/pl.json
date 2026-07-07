@@ -1,0 +1,336 @@
+{
+  "language": {
+    "label": "język"
+  },
+  "brand": {
+    "tagline": "p2p · tor · e2e"
+  },
+  "boot": {
+    "steps": [
+      "inicjalizacja tora...",
+      "generowanie .onion...",
+      "wymiana kluczy x3dh...",
+      "weryfikacja tożsamości...",
+      "połączenie nawiązane"
+    ]
+  },
+  "torStatus": {
+    "connected": "TOR: aktywny",
+    "connecting": "TOR: łączenie...",
+    "error": "TOR: błąd"
+  },
+  "qr": {
+    "title": "TWÓJ ADRES",
+    "yourName": "twoja nazwa",
+    "nameValue": "mój_kontakt",
+    "torAddress": "adres tor",
+    "hint": "pokaż ten QR aby dodać cię jako kontakt. adres nie ujawnia twojej lokalizacji."
+  },
+  "addContact": {
+    "title": "dodaj kontakt",
+    "subtitleForm": "wpisz adres .onion",
+    "subtitleVerify": "weryfikacja przez tor...",
+    "subtitleDone": "kontakt dodany",
+    "onionLabel": "ADRES .ONION *",
+    "onionPlaceholder": "np. x7wqibd4zmbxojl5.onion",
+    "nameLabel": "NAZWA KONTAKTU",
+    "namePlaceholder": "np. Jan Kowalski",
+    "nameHint": "jeśli pusta — użyjemy fragmentu adresu",
+    "howToTitle": "JAK UZYSKAĆ ADRES",
+    "howToBullets": [
+      "· poproś kontakt o pokazanie jego QR",
+      "· zeskanuj QR lub przepisz adres ręcznie",
+      "· adres .onion nigdy nie ujawnia lokalizacji"
+    ],
+    "cancel": "ANULUJ",
+    "connect": "POŁĄCZ PRZEZ TOR",
+    "connectingTo": "łączę z",
+    "verifySteps": [
+      "nawiązywanie połączenia tor",
+      "wymiana kluczy x3dh",
+      "weryfikacja tożsamości węzła",
+      "inicjalizacja signal protocol"
+    ],
+    "doneSubtitle": "kontakt dodany · połączenie aktywne",
+    "torAddress": "adres tor",
+    "trust": "zaufanie",
+    "trustDirect": "bezpośrednie",
+    "protocol": "protokół",
+    "protocolValue": "signal + tor",
+    "goToChat": "PRZEJDŹ DO ROZMOWY",
+    "errEmpty": "wpisz adres .onion",
+    "errNotOnion": "adres musi kończyć się na .onion",
+    "errTooShort": "adres jest za krótki"
+  },
+  "privateChat": {
+    "title": "prywatna rozmowa",
+    "subtitle": "kanał 1:1 poza grupą",
+    "contact": "kontakt",
+    "torAddress": "adres tor",
+    "trust": "zaufanie",
+    "trustDirect": "bezpośrednie",
+    "trustIndirect": "pośrednie",
+    "context": "kontekst",
+    "whatItMeans": "CO TO ZNACZY",
+    "bullets": [
+      "· nowy kanał Tor bezpośrednio do {{name}}",
+      "· reszta grupy nie widzi tej rozmowy",
+      "· reszta grupy nie wie że rozmawiasz",
+      "· osobne klucze Signal Protocol"
+    ],
+    "cancel": "ANULUJ",
+    "open": "OTWÓRZ PRYWATNY KANAŁ"
+  },
+  "nick": {
+    "title": "Prywatna rozmowa"
+  },
+  "message": {
+    "deleted": "usunięto",
+    "deletedInline": "[wiadomość usunięta]",
+    "ephemeral": "efemeryczna · {{time}}",
+    "unitS": "{{s}}s",
+    "unitMS": "{{m}}m {{s}}s",
+    "unitH": "{{h}}h"
+  },
+  "photo": {
+    "steps": [
+      "usuwanie metadanych GPS",
+      "usuwanie danych urządzenia",
+      "re-kompresja obrazu",
+      "szyfrowanie Signal"
+    ],
+    "headerPreview": "PODGLĄD",
+    "headerProcessing": "SANITYZACJA...",
+    "headerReady": "GOTOWE DO WYSYŁKI",
+    "overlaySanitizing": "SANITYZACJA",
+    "exifRemoved": "EXIF usunięty",
+    "willRemoveTitle": "PRZED WYSYŁKĄ ZOSTANIE USUNIĘTE",
+    "willRemoveBullets": [
+      "· GPS i lokalizacja z EXIF",
+      "· model i numer seryjny aparatu",
+      "· data i godzina wykonania zdjęcia",
+      "· miniatura i inne metadane"
+    ],
+    "cancel": "ANULUJ",
+    "sanitizeAndSend": "SANITYZUJ I WYŚLIJ",
+    "sendEncrypted": "WYŚLIJ ZASZYFROWANE",
+    "msgCaption": "e2e · exif usunięty",
+    "fullscreenCaption": "zaszyfrowane · metadane usunięte"
+  },
+  "torNodes": {
+    "roles": ["Entry Guard", "Middle Relay", "Exit Relay"]
+  },
+  "e2e": {
+    "title": "szyfrowanie end-to-end",
+    "subtitle": "signal protocol · double ratchet",
+    "verifiedStatus": "klucz zweryfikowany osobiście",
+    "notVerifiedStatus": "klucz niezweryfikowany",
+    "verifiedDesc": "rozmowa jest bezpieczna. nikt nie jest pośrodku.",
+    "notVerifiedDesc": "porównaj fingerprint z rozmówcą osobiście lub przez inny kanał.",
+    "contactFallback": "kontakt",
+    "fingerprintOf": "FINGERPRINT — {{name}}",
+    "copied": "skopiowano!",
+    "copyFp": "kopiuj fingerprint",
+    "yourFingerprint": "TWÓJ FINGERPRINT",
+    "howToTitle": "JAK WERYFIKOWAĆ",
+    "howToSteps": [
+      "1. poproś {{name}} aby odczytał swój fingerprint",
+      "2. porównaj z tym co widzisz powyżej",
+      "3. jeśli identyczne — potwierdź poniżej",
+      "4. jeśli różne — ktoś może być pośrodku"
+    ],
+    "grid": {
+      "protocol": "protokół",
+      "protocolValue": "Signal Protocol",
+      "keyExchange": "wymiana kluczy",
+      "keyExchangeValue": "X3DH + Curve25519",
+      "cipher": "szyfr",
+      "cipherValue": "AES-256-GCM",
+      "forwardSecrecy": "forward secrecy",
+      "forwardSecrecyValue": "Double Ratchet"
+    },
+    "close": "ZAMKNIJ",
+    "unverify": "COFNIJ WERYFIKACJĘ",
+    "confirmVerify": "POTWIERDZAM — KLUCZ ZGODNY"
+  },
+  "torModal": {
+    "title": "status sieci tor",
+    "subtitle": "3-węzłowy obwód · onion routing",
+    "active": "TOR AKTYWNY",
+    "totalLatency": "łączna latencja:",
+    "circuitId": "ID OBWODU (CIRCUIT)",
+    "circuitNodes": "WĘZŁY OBWODU",
+    "you": "TY",
+    "targetFallback": "cel",
+    "whatEachSees": "CO WIDZI KAŻDY WĘZEŁ",
+    "seesRows": [
+      { "label": "węzeł 1 (entry)", "value": "zna twój IP,  NIE zna odbiorcy ani treści" },
+      { "label": "węzeł 2 (middle)", "value": "NIE zna ani nadawcy, ani odbiorcy" },
+      { "label": "węzeł 3 (exit)", "value": "zna odbiorcę (.onion),  NIE zna twojego IP" }
+    ],
+    "target": "CEL POŁĄCZENIA",
+    "hiddenServiceAddr": "adres hidden service",
+    "na": "n/d",
+    "close": "ZAMKNIJ",
+    "building": "budowanie nowego obwodu...",
+    "newCircuit": "NOWY OBWÓD TOR"
+  },
+  "chat": {
+    "emptyTitle": "wybierz kontakt lub grupę",
+    "emptySubtitle": "wszystkie połączenia przez tor",
+    "privateBadge": "PRYWATNY",
+    "membersEpoch": "{{count}} członków · epoch={{epoch}}",
+    "privateChannel": "prywatny kanał · {{onion}}",
+    "titleE2E": "Status szyfrowania E2E",
+    "titleTor": "Status sieci Tor",
+    "titleInfo": "Szczegóły",
+    "titleClosePanel": "Zamknij panel",
+    "titleOpenPanel": "Otwórz panel",
+    "privBanner": "niewidoczna dla pozostałych członków · {{group}}",
+    "emptyPriv": "zacznij prywatną rozmowę",
+    "emptyMsgs": "brak wiadomości",
+    "ttlLabel": "czas życia:",
+    "cameraTitle": "Wyślij zdjęcie (EXIF zostanie usunięty)",
+    "placeholderPriv": "wiadomość prywatna...",
+    "placeholderEph": "wiadomość efemeryczna...",
+    "placeholderNormal": "wiadomość..."
+  },
+  "group": {
+    "visibility": {
+      "HIDDEN":  { "label": "Ukryta",    "desc": "Niewidoczna w sieci. Tylko zaproszeni wiedzą że istnieje." },
+      "PRIVATE": { "label": "Prywatna",  "desc": "Istnienie widoczne w sieci, treść i członkowie zaszyfrowane." },
+      "PUBLIC":  { "label": "Publiczna", "desc": "Każdy węzeł w sieci może ją znaleźć i poprosić o dołączenie." }
+    },
+    "invite": {
+      "FOUNDER_ONLY": { "label": "Tylko założyciel", "desc": "Jedyna osoba mogąca zapraszać nowych członków." },
+      "ADMINS_ONLY":  { "label": "Adminowie",        "desc": "Wszyscy adminowie grupy mogą zapraszać." },
+      "ANY_MEMBER":   { "label": "Każdy członek",    "desc": "Każdy uczestnik może zapraszać znajomych." }
+    },
+    "ttl": {
+      "off":   { "label": "Wyłączone",  "desc": "Wiadomości nie znikają automatycznie." },
+      "60":    { "label": "1 minuta",   "desc": "Wszystkie wiadomości znikają po 1 min." },
+      "300":   { "label": "5 minut",    "desc": "Wszystkie wiadomości znikają po 5 min." },
+      "3600":  { "label": "1 godzina",  "desc": "Wszystkie wiadomości znikają po 1h." },
+      "86400": { "label": "24 godziny", "desc": "Wszystkie wiadomości znikają po 24h." }
+    }
+  },
+  "createGroup": {
+    "title": "nowa grupa",
+    "stepOf": "krok {{step}} z 3",
+    "nameLabel": "NAZWA GRUPY",
+    "namePlaceholder": "np. projekt_alfa",
+    "nameErr": "podaj nazwę grupy",
+    "nameHint": "nazwa widoczna tylko dla członków grupy",
+    "cancel": "ANULUJ",
+    "next": "DALEJ →",
+    "back": "← WRÓĆ",
+    "visibility": "WIDOCZNOŚĆ GRUPY",
+    "whoCanInvite": "KTO MOŻE ZAPRASZAĆ",
+    "forcedTTL": "WYMUSZONE ZNIKANIE WIADOMOŚCI",
+    "selectMembers": "WYBIERZ CZŁONKÓW",
+    "selectedCount": "({{count}} wybranych)",
+    "summaryName": "nazwa",
+    "summaryVisibility": "widoczność",
+    "summaryInvite": "zaproszenia",
+    "summaryTTL": "znikanie",
+    "create": "UTWÓRZ GRUPĘ"
+  },
+  "editGroup": {
+    "title": "ustawienia grupy",
+    "subtitle": "{{name}} · tylko ty to widzisz",
+    "nameLabel": "NAZWA GRUPY",
+    "nameErr": "podaj nazwę grupy",
+    "visibility": "WIDOCZNOŚĆ GRUPY",
+    "whoCanInvite": "KTO MOŻE ZAPRASZAĆ",
+    "forcedTTL": "WYMUSZONE ZNIKANIE WIADOMOŚCI",
+    "rememberTitle": "PAMIĘTAJ",
+    "rememberDesc": "zmiana widoczności nie usuwa informacji którą już zobaczyli inni węzły w sieci. ukrycie grupy działa w pełni tylko gdy zastosowane od początku.",
+    "cancel": "ANULUJ",
+    "save": "ZAPISZ USTAWIENIA"
+  },
+  "sidebar": {
+    "expandPanel": "Rozwiń panel",
+    "collapsePanel": "Zwiń panel",
+    "tabContacts": "KONTAKTY",
+    "tabGroups": "GRUPY",
+    "titleQR": "Twój QR",
+    "titleAddContact": "Dodaj kontakt",
+    "titleCreateGroup": "Utwórz grupę",
+    "membersShort": "{{count}} os.",
+    "founder": "założyciel",
+    "addContact": "DODAJ KONTAKT",
+    "createGroup": "UTWÓRZ GRUPĘ"
+  },
+  "infoPanel": {
+    "members": "CZŁONKOWIE",
+    "details": "SZCZEGÓŁY",
+    "titleGroupSettings": "Ustawienia grupy",
+    "titleClosePanel": "Zamknij panel",
+    "selectHint1": "wybierz kontakt",
+    "selectHint2": "lub grupę",
+    "invites": "zaproszenia: {{policy}}",
+    "disappear": "znikanie: {{ttl}}",
+    "epochMembers": "epoch={{epoch}} · {{count}} os.",
+    "editSettings": "EDYTUJ USTAWIENIA",
+    "memberHint": "kliknij członka lub jego nick aby otworzyć prywatną rozmowę",
+    "privateChannel": "KANAŁ PRYWATNY",
+    "invisibleForGroup": "niewidoczny dla grupy",
+    "trustDirect": "● zaufany bezpośrednio",
+    "trustIndirect": "◐ zaufany pośrednio",
+    "status": "STATUS",
+    "online": "online",
+    "lastSeen": "ostatnio {{time}}",
+    "encryption": "SZYFROWANIE",
+    "encryptionList": ["· signal protocol", "· double ratchet", "· forward secrecy", "· tor hidden service"],
+    "torAddress": "ADRES TOR",
+    "rememberTitle": "PAMIĘTAJ",
+    "rememberDesc": "szyfrowanie chroni treść. bezpieczeństwo urządzenia zależy od ciebie."
+  },
+  "memberBtn": {
+    "title": "Otwórz prywatną rozmowę",
+    "online": "online"
+  },
+  "nav": {
+    "contacts": "Kontakty",
+    "groups": "Grupy",
+    "add": "Dodaj",
+    "newGroup": "Nowa gr.",
+    "qr": "QR"
+  },
+  "drawer": {
+    "invites": "zaproszenia: {{policy}}",
+    "disappear": "znikanie: {{ttl}}",
+    "editSettings": "EDYTUJ USTAWIENIA",
+    "members": "CZŁONKOWIE",
+    "memberHint": "dotknij członka aby otworzyć prywatną rozmowę",
+    "privateChannel": "KANAŁ PRYWATNY",
+    "invisibleForGroup": "niewidoczny dla grupy",
+    "status": "status",
+    "lastSeenShort": "ostat. {{time}}",
+    "trust": "zaufanie",
+    "trustDirect": "bezpośrednie",
+    "trustIndirect": "pośrednie",
+    "torAddress": "ADRES TOR",
+    "encryption": "SZYFROWANIE",
+    "encryptionList": ["signal protocol", "double ratchet", "forward secrecy", "tor hidden service"]
+  },
+  "demo": {
+    "now": "teraz",
+    "ago2h": "2h temu",
+    "msg": {
+      "a1b2c3_1": "połączenie nawiązane",
+      "a1b2c3_2": "potwierdzam. klucze OK",
+      "a1b2c3_3": "ta wiadomość zniknie za 5min",
+      "a1b2c3_4": "forward secrecy aktywne",
+      "d4e5f6_1": "bootstrap przez węzeł B OK",
+      "d4e5f6_2": "widzę 6 węzłów w sieci",
+      "grp_001_1": "klucz grupowy epoch=3 aktywny",
+      "grp_001_2": "potwierdzam rotację",
+      "grp_001_3": "synchronizacja logu operacji OK",
+      "grp_001_4": "węzły zsynchronizowane",
+      "grp_001_5": "widzę 4 aktywnych uczestników",
+      "grp_002_1": "sprawdzam połączenie",
+      "grp_002_2": "OK, jestem"
+    }
+  }
+}

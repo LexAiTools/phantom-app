@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useI18n } from "./i18n/index.jsx";
+import { SUPPORTED_LANGUAGES, LANGUAGE_NAMES } from "./i18n/config.js";
 
 // ─── STAŁE ────────────────────────────────────────────────────────────────────
 const C = {
@@ -32,30 +34,37 @@ const INIT_GROUPS = [
   {id:"grp_001", name:"grupa_projekt", memberIds:["a1b2c3","d4e5f6","g7h8i9","m1n2o3"], online:3, unread:1, epoch:3, visibility:"PRIVATE",  invitePolicy:"ADMINS_ONLY", forcedTTL:null, isFounder:true },
   {id:"grp_002", name:"grupa_alfa",    memberIds:["a1b2c3","d4e5f6"],                   online:2, unread:0, epoch:1, visibility:"HIDDEN",   invitePolicy:"FOUNDER_ONLY",forcedTTL:300,  isFounder:false},
 ];
+// Teksty wiadomości demo trzymane jako klucze tłumaczeń (tk) — rozwiązywane w ChatPanel.
 const MSGS = {
   a1b2c3:[
-    {id:1,from:"them",sid:"a1b2c3",text:"połączenie nawiązane",        ts:"14:21",eph:false},
-    {id:2,from:"me",              text:"potwierdzam. klucze OK",        ts:"14:21",eph:false},
-    {id:3,from:"them",sid:"a1b2c3",text:"ta wiadomość zniknie za 5min",ts:"14:22",eph:true,ttl:300,rem:287},
-    {id:4,from:"them",sid:"a1b2c3",text:"forward secrecy aktywne",     ts:"14:23",eph:false},
+    {id:1,from:"them",sid:"a1b2c3",tk:"demo.msg.a1b2c3_1",ts:"14:21",eph:false},
+    {id:2,from:"me",              tk:"demo.msg.a1b2c3_2",ts:"14:21",eph:false},
+    {id:3,from:"them",sid:"a1b2c3",tk:"demo.msg.a1b2c3_3",ts:"14:22",eph:true,ttl:300,rem:287},
+    {id:4,from:"them",sid:"a1b2c3",tk:"demo.msg.a1b2c3_4",ts:"14:23",eph:false},
   ],
   d4e5f6:[
-    {id:1,from:"them",sid:"d4e5f6",text:"bootstrap przez węzeł B OK",ts:"13:10",eph:false},
-    {id:2,from:"me",              text:"widzę 6 węzłów w sieci",      ts:"13:11",eph:false},
+    {id:1,from:"them",sid:"d4e5f6",tk:"demo.msg.d4e5f6_1",ts:"13:10",eph:false},
+    {id:2,from:"me",              tk:"demo.msg.d4e5f6_2",ts:"13:11",eph:false},
   ],
   g7h8i9:[], m1n2o3:[],
   grp_001:[
-    {id:1,from:"kontakt_7f3a",sid:"a1b2c3",text:"klucz grupowy epoch=3 aktywny",    ts:"12:00",eph:false},
-    {id:2,from:"me",                        text:"potwierdzam rotację",               ts:"12:01",eph:false},
-    {id:3,from:"kontakt_2c9b",sid:"d4e5f6",text:"synchronizacja logu operacji OK",  ts:"12:02",eph:false},
-    {id:4,from:"kontakt_a5d1",sid:"g7h8i9",text:"węzły zsynchronizowane",           ts:"12:03",eph:true,ttl:60,rem:42},
-    {id:5,from:"kontakt_f8e2",sid:"m1n2o3",text:"widzę 4 aktywnych uczestników",    ts:"12:04",eph:false},
+    {id:1,from:"kontakt_7f3a",sid:"a1b2c3",tk:"demo.msg.grp_001_1",ts:"12:00",eph:false},
+    {id:2,from:"me",                        tk:"demo.msg.grp_001_2",ts:"12:01",eph:false},
+    {id:3,from:"kontakt_2c9b",sid:"d4e5f6",tk:"demo.msg.grp_001_3",ts:"12:02",eph:false},
+    {id:4,from:"kontakt_a5d1",sid:"g7h8i9",tk:"demo.msg.grp_001_4",ts:"12:03",eph:true,ttl:60,rem:42},
+    {id:5,from:"kontakt_f8e2",sid:"m1n2o3",tk:"demo.msg.grp_001_5",ts:"12:04",eph:false},
   ],
   grp_002:[
-    {id:1,from:"kontakt_7f3a",sid:"a1b2c3",text:"sprawdzam połączenie",ts:"11:00",eph:false},
-    {id:2,from:"me",                        text:"OK, jestem",          ts:"11:01",eph:false},
+    {id:1,from:"kontakt_7f3a",sid:"a1b2c3",tk:"demo.msg.grp_002_1",ts:"11:00",eph:false},
+    {id:2,from:"me",                        tk:"demo.msg.grp_002_2",ts:"11:01",eph:false},
   ],
 };
+
+// ─── HELPERY I18N (etykiety zależne od języka) ────────────────────────────────
+// Mapuje wartość lastSeen z danych demo na tłumaczenie (inne wartości zwraca bez zmian).
+const lastSeenLabel = (t, val) =>
+  val === "teraz" ? t("demo.now") : val === "2h temu" ? t("demo.ago2h") : val;
+const ttlKey = v => (v == null ? "off" : String(v));
 
 // ─── IKONY ────────────────────────────────────────────────────────────────────
 const P = {
@@ -114,8 +123,9 @@ function Logo({size=48}) {
 
 // ─── BOOT ────────────────────────────────────────────────────────────────────
 function Boot({onDone}) {
+  const {t}=useI18n();
   const [step,setStep]=useState(0);
-  const steps=["inicjalizacja tora...","generowanie .onion...","wymiana kluczy x3dh...","weryfikacja tożsamości...","połączenie nawiązane"];
+  const steps=t("boot.steps");
   useEffect(()=>{
     const t=setTimeout(()=>{ step<steps.length-1?setStep(s=>s+1):onDone(); },step<steps.length-1?550:700);
     return ()=>clearTimeout(t);
@@ -137,8 +147,9 @@ function Boot({onDone}) {
 
 // ─── TOR STATUS ───────────────────────────────────────────────────────────────
 function TorDot({status="connected"}) {
+  const {t}=useI18n();
   const col=status==="connected"?C.green:status==="connecting"?C.yellow:C.red;
-  const lbl=status==="connected"?"TOR: aktywny":status==="connecting"?"TOR: łączenie...":"TOR: błąd";
+  const lbl=status==="connected"?t("torStatus.connected"):status==="connecting"?t("torStatus.connecting"):t("torStatus.error");
   return (
     <div style={{display:"flex",alignItems:"center",gap:6}}>
       <div style={{width:6,height:6,borderRadius:"50%",background:col,boxShadow:`0 0 6px ${col}`}}/>
@@ -159,12 +170,13 @@ function Tag({icon,label,color,bg}) {
 
 // ─── MODAL: QR ───────────────────────────────────────────────────────────────
 function QRModal({onClose}) {
+  const {t}=useI18n();
   const addr="ab3xk9p2mwq7nvs1.onion";
   return (
     <div onClick={onClose} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.88)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:200,fontFamily:F}}>
       <div onClick={e=>e.stopPropagation()} style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:6,padding:28,width:300,maxWidth:"calc(100vw - 32px)"}}>
         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:18}}>
-          <span style={{fontSize:12,color:C.green,letterSpacing:1}}>TWÓJ ADRES</span>
+          <span style={{fontSize:12,color:C.green,letterSpacing:1}}>{t("qr.title")}</span>
           <button onClick={onClose} style={{background:"none",border:"none",cursor:"pointer",display:"flex"}}><Ico name="close" color={C.dim}/></button>
         </div>
         <div style={{background:"#fff",padding:12,borderRadius:2,display:"grid",gridTemplateColumns:"repeat(17,1fr)",gap:2,marginBottom:18}}>
@@ -175,12 +187,12 @@ function QRModal({onClose}) {
           })}
         </div>
         <div style={{background:C.bg,border:`1px solid ${C.border}`,borderRadius:2,padding:"10px 12px",marginBottom:10}}>
-          <div style={{fontSize:9,color:C.dim,marginBottom:4}}>twoja nazwa</div>
-          <div style={{fontSize:13,color:C.text,fontFamily:F,marginBottom:6}}>mój_kontakt</div>
-          <div style={{fontSize:9,color:C.dim,marginBottom:4}}>adres tor</div>
+          <div style={{fontSize:9,color:C.dim,marginBottom:4}}>{t("qr.yourName")}</div>
+          <div style={{fontSize:13,color:C.text,fontFamily:F,marginBottom:6}}>{t("qr.nameValue")}</div>
+          <div style={{fontSize:9,color:C.dim,marginBottom:4}}>{t("qr.torAddress")}</div>
           <div style={{fontSize:10,color:C.green,wordBreak:"break-all",letterSpacing:0.4}}>{addr}</div>
         </div>
-        <div style={{fontSize:9,color:C.dim,lineHeight:1.7}}>pokaż ten QR aby dodać cię jako kontakt. adres nie ujawnia twojej lokalizacji.</div>
+        <div style={{fontSize:9,color:C.dim,lineHeight:1.7}}>{t("qr.hint")}</div>
       </div>
     </div>
   );
@@ -188,6 +200,7 @@ function QRModal({onClose}) {
 
 // ─── MODAL: DODAJ KONTAKT ────────────────────────────────────────────────────
 function AddContactModal({onAdd,onClose}) {
+  const {t}=useI18n();
   const [step,setStep]=useState("form");
   const [onion,setOnion]=useState("");
   const [name,setName]=useState("");
@@ -202,10 +215,10 @@ function AddContactModal({onAdd,onClose}) {
   },[step]);
 
   const validate=()=>{
-    const t=onion.trim().toLowerCase();
-    if(!t){ setErr("wpisz adres .onion"); return; }
-    if(!t.endsWith(".onion")){ setErr("adres musi kończyć się na .onion"); return; }
-    if(t.length<12){ setErr("adres jest za krótki"); return; }
+    const v=onion.trim().toLowerCase();
+    if(!v){ setErr("empty"); return; }
+    if(!v.endsWith(".onion")){ setErr("notOnion"); return; }
+    if(v.length<12){ setErr("tooShort"); return; }
     setErr(""); setStep("verify");
   };
 
@@ -231,9 +244,9 @@ function AddContactModal({onAdd,onClose}) {
               <Ico name="plus" size={16} color={C.green}/>
             </div>
             <div>
-              <div style={{fontSize:13,color:C.text}}>dodaj kontakt</div>
+              <div style={{fontSize:13,color:C.text}}>{t("addContact.title")}</div>
               <div style={{fontSize:9,color:C.dim,marginTop:2}}>
-                {step==="form"?"wpisz adres .onion":step==="verify"?"weryfikacja przez tor...":"kontakt dodany"}
+                {step==="form"?t("addContact.subtitleForm"):step==="verify"?t("addContact.subtitleVerify"):t("addContact.subtitleDone")}
               </div>
             </div>
           </div>
@@ -248,43 +261,41 @@ function AddContactModal({onAdd,onClose}) {
         {step==="form" && (
           <div>
             <div style={{marginBottom:14}}>
-              <div style={{fontSize:9,color:C.dim,letterSpacing:1,marginBottom:6}}>ADRES .ONION *</div>
+              <div style={{fontSize:9,color:C.dim,letterSpacing:1,marginBottom:6}}>{t("addContact.onionLabel")}</div>
               <input
                 autoFocus
                 value={onion}
                 onChange={e=>{ setOnion(e.target.value); setErr(""); }}
                 onKeyDown={e=>e.key==="Enter"&&validate()}
-                placeholder="np. x7wqibd4zmbxojl5.onion"
+                placeholder={t("addContact.onionPlaceholder")}
                 style={{width:"100%",background:C.bg,border:`1px solid ${err?C.red:C.border}`,borderRadius:3,padding:"10px 12px",color:C.green,fontSize:12,fontFamily:F,outline:"none",letterSpacing:0.4,boxSizing:"border-box"}}
               />
-              {err && <div style={{fontSize:9,color:C.red,marginTop:5}}>⚠ {err}</div>}
+              {err && <div style={{fontSize:9,color:C.red,marginTop:5}}>⚠ {t(err==="empty"?"addContact.errEmpty":err==="notOnion"?"addContact.errNotOnion":"addContact.errTooShort")}</div>}
             </div>
             <div style={{marginBottom:14}}>
-              <div style={{fontSize:9,color:C.dim,letterSpacing:1,marginBottom:6}}>NAZWA KONTAKTU</div>
+              <div style={{fontSize:9,color:C.dim,letterSpacing:1,marginBottom:6}}>{t("addContact.nameLabel")}</div>
               <input
                 value={name}
                 onChange={e=>setName(e.target.value)}
                 onKeyDown={e=>e.key==="Enter"&&validate()}
-                placeholder="np. Jan Kowalski"
+                placeholder={t("addContact.namePlaceholder")}
                 style={{width:"100%",background:C.bg,border:`1px solid ${C.border}`,borderRadius:3,padding:"10px 12px",color:C.text,fontSize:12,fontFamily:F,outline:"none",boxSizing:"border-box"}}
               />
-              <div style={{fontSize:9,color:C.dim,marginTop:4}}>jeśli pusta — użyjemy fragmentu adresu</div>
+              <div style={{fontSize:9,color:C.dim,marginTop:4}}>{t("addContact.nameHint")}</div>
             </div>
             <div style={{background:"rgba(0,255,135,0.04)",border:"1px solid rgba(0,255,135,0.12)",borderRadius:3,padding:"10px 12px",marginBottom:20}}>
-              <div style={{fontSize:9,color:C.green,letterSpacing:1,marginBottom:5}}>JAK UZYSKAĆ ADRES</div>
+              <div style={{fontSize:9,color:C.green,letterSpacing:1,marginBottom:5}}>{t("addContact.howToTitle")}</div>
               <div style={{fontSize:9,color:C.dim,lineHeight:1.8}}>
-                · poproś kontakt o pokazanie jego QR<br/>
-                · zeskanuj QR lub przepisz adres ręcznie<br/>
-                · adres .onion nigdy nie ujawnia lokalizacji
+                {t("addContact.howToBullets").map((b,i)=><React.Fragment key={i}>{b}<br/></React.Fragment>)}
               </div>
             </div>
             <div style={{display:"flex",gap:8}}>
               <button onClick={onClose} style={{flex:1,padding:"10px 0",background:"none",border:`1px solid ${C.border}`,borderRadius:3,cursor:"pointer",color:C.dim,fontSize:11,fontFamily:F,letterSpacing:0.8}}>
-                ANULUJ
+                {t("addContact.cancel")}
               </button>
               <button onClick={validate} style={{flex:2,padding:"10px 0",background:C.greenFaint,border:"1px solid rgba(0,255,135,0.3)",borderRadius:3,cursor:"pointer",color:C.green,fontSize:11,fontFamily:F,letterSpacing:0.8,display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
                 <Ico name="key" size={12} color={C.green}/>
-                POŁĄCZ PRZEZ TOR
+                {t("addContact.connect")}
               </button>
             </div>
           </div>
@@ -294,10 +305,10 @@ function AddContactModal({onAdd,onClose}) {
         {step==="verify" && (
           <div style={{padding:"8px 0"}}>
             <div style={{background:C.bg,border:`1px solid ${C.border}`,borderRadius:3,padding:"10px 14px",marginBottom:16}}>
-              <div style={{fontSize:9,color:C.dim,marginBottom:4}}>łączę z</div>
+              <div style={{fontSize:9,color:C.dim,marginBottom:4}}>{t("addContact.connectingTo")}</div>
               <div style={{fontSize:11,color:C.green,fontFamily:F,wordBreak:"break-all",letterSpacing:0.4}}>{onion.trim()}</div>
             </div>
-            {["nawiązywanie połączenia tor","wymiana kluczy x3dh","weryfikacja tożsamości węzła","inicjalizacja signal protocol"].map((label,i)=>(
+            {t("addContact.verifySteps").map((label,i)=>(
               <div key={i} style={{display:"flex",alignItems:"center",gap:10,padding:"6px 0",opacity:dots>=i?1:0.2,transition:"opacity 0.4s"}}>
                 <span style={{fontSize:11,color:C.green,width:14,flexShrink:0}}>{dots>i?"✓":dots===i?"›":"·"}</span>
                 <span style={{fontSize:11,color:dots>=i?C.green:C.faint,fontFamily:F}}>{label}</span>
@@ -316,25 +327,25 @@ function AddContactModal({onAdd,onClose}) {
               <div style={{fontSize:15,color:C.text,fontFamily:F,marginBottom:4}}>
                 {name.trim()||"kontakt_"+onion.trim().slice(0,4)}
               </div>
-              <div style={{fontSize:9,color:C.dim}}>kontakt dodany · połączenie aktywne</div>
+              <div style={{fontSize:9,color:C.dim}}>{t("addContact.doneSubtitle")}</div>
             </div>
             <div style={{background:C.bg,border:`1px solid ${C.border}`,borderRadius:3,padding:"10px 14px",marginBottom:20}}>
               <div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}>
-                <span style={{fontSize:9,color:C.dim}}>adres tor</span>
+                <span style={{fontSize:9,color:C.dim}}>{t("addContact.torAddress")}</span>
                 <span style={{fontSize:9,color:C.green,textAlign:"right",wordBreak:"break-all",maxWidth:"65%"}}>{shortOnion(onion.trim())}</span>
               </div>
               <div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}>
-                <span style={{fontSize:9,color:C.dim}}>zaufanie</span>
-                <span style={{fontSize:9,color:C.green}}>bezpośrednie</span>
+                <span style={{fontSize:9,color:C.dim}}>{t("addContact.trust")}</span>
+                <span style={{fontSize:9,color:C.green}}>{t("addContact.trustDirect")}</span>
               </div>
               <div style={{display:"flex",justifyContent:"space-between"}}>
-                <span style={{fontSize:9,color:C.dim}}>protokół</span>
-                <span style={{fontSize:9,color:C.text}}>signal + tor</span>
+                <span style={{fontSize:9,color:C.dim}}>{t("addContact.protocol")}</span>
+                <span style={{fontSize:9,color:C.text}}>{t("addContact.protocolValue")}</span>
               </div>
             </div>
             <button onClick={finish} style={{width:"100%",padding:"10px 0",background:C.greenFaint,border:"1px solid rgba(0,255,135,0.3)",borderRadius:3,cursor:"pointer",color:C.green,fontSize:11,fontFamily:F,letterSpacing:0.8,display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
               <Ico name="send" size={12} color={C.green}/>
-              PRZEJDŹ DO ROZMOWY
+              {t("addContact.goToChat")}
             </button>
           </div>
         )}
@@ -345,6 +356,7 @@ function AddContactModal({onAdd,onClose}) {
 
 // ─── MODAL: PRYWATNY CZAT ────────────────────────────────────────────────────
 function PrivateModal({member,groupName,onConfirm,onCancel}) {
+  const {t}=useI18n();
   return (
     <div onClick={onCancel} style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.88)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:200,fontFamily:F}}>
       <div onClick={e=>e.stopPropagation()} style={{background:C.surface,border:"1px solid #2A2A4A",borderRadius:6,padding:28,width:340,maxWidth:"calc(100vw - 32px)"}}>
@@ -353,46 +365,43 @@ function PrivateModal({member,groupName,onConfirm,onCancel}) {
             <Ico name="eyeoff" size={18} color={C.purple}/>
           </div>
           <div>
-            <div style={{fontSize:13,color:C.text,fontFamily:F}}>prywatna rozmowa</div>
-            <div style={{fontSize:9,color:C.dim,marginTop:3}}>kanał 1:1 poza grupą</div>
+            <div style={{fontSize:13,color:C.text,fontFamily:F}}>{t("privateChat.title")}</div>
+            <div style={{fontSize:9,color:C.dim,marginTop:3}}>{t("privateChat.subtitle")}</div>
           </div>
         </div>
         <div style={{background:C.bg,border:`1px solid ${C.border}`,borderRadius:4,padding:"12px 14px",marginBottom:14}}>
           <div style={{display:"flex",justifyContent:"space-between",marginBottom:8,alignItems:"center"}}>
-            <span style={{fontSize:9,color:C.dim}}>kontakt</span>
+            <span style={{fontSize:9,color:C.dim}}>{t("privateChat.contact")}</span>
             <span style={{fontSize:12,color:C.text,fontFamily:F}}>{member.name}</span>
           </div>
           <div style={{display:"flex",justifyContent:"space-between",marginBottom:8,alignItems:"center"}}>
-            <span style={{fontSize:9,color:C.dim}}>adres tor</span>
+            <span style={{fontSize:9,color:C.dim}}>{t("privateChat.torAddress")}</span>
             <span style={{fontSize:9,color:C.green,fontFamily:F}}>{shortOnion(member.onion)}</span>
           </div>
           <div style={{display:"flex",justifyContent:"space-between",marginBottom:8,alignItems:"center"}}>
-            <span style={{fontSize:9,color:C.dim}}>zaufanie</span>
+            <span style={{fontSize:9,color:C.dim}}>{t("privateChat.trust")}</span>
             <span style={{fontSize:9,color:member.trust==="DIRECT"?C.green:C.yellow}}>
-              {member.trust==="DIRECT"?"bezpośrednie":"pośrednie"}
+              {member.trust==="DIRECT"?t("privateChat.trustDirect"):t("privateChat.trustIndirect")}
             </span>
           </div>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-            <span style={{fontSize:9,color:C.dim}}>kontekst</span>
+            <span style={{fontSize:9,color:C.dim}}>{t("privateChat.context")}</span>
             <span style={{fontSize:9,color:C.dim}}>{groupName}</span>
           </div>
         </div>
         <div style={{background:"rgba(155,109,255,0.06)",border:"1px solid rgba(155,109,255,0.18)",borderRadius:4,padding:"10px 14px",marginBottom:20}}>
-          <div style={{fontSize:9,color:C.purple,letterSpacing:1,marginBottom:6}}>CO TO ZNACZY</div>
+          <div style={{fontSize:9,color:C.purple,letterSpacing:1,marginBottom:6}}>{t("privateChat.whatItMeans")}</div>
           <div style={{fontSize:10,color:C.dim,lineHeight:1.9}}>
-            · nowy kanał Tor bezpośrednio do {member.name}<br/>
-            · reszta grupy nie widzi tej rozmowy<br/>
-            · reszta grupy nie wie że rozmawiasz<br/>
-            · osobne klucze Signal Protocol
+            {t("privateChat.bullets",{name:member.name}).map((b,i)=><React.Fragment key={i}>{b}<br/></React.Fragment>)}
           </div>
         </div>
         <div style={{display:"flex",gap:8}}>
           <button onClick={onCancel} style={{flex:1,padding:"10px 0",background:"none",border:`1px solid ${C.border}`,borderRadius:3,cursor:"pointer",color:C.dim,fontSize:11,fontFamily:F,letterSpacing:0.8}}>
-            ANULUJ
+            {t("privateChat.cancel")}
           </button>
           <button onClick={onConfirm} style={{flex:2,padding:"10px 0",background:C.purpleFaint,border:"1px solid rgba(155,109,255,0.35)",borderRadius:3,cursor:"pointer",color:C.purple,fontSize:11,fontFamily:F,letterSpacing:0.8,display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
             <Ico name="lock" size={12} color={C.purple}/>
-            OTWÓRZ PRYWATNY KANAŁ
+            {t("privateChat.open")}
           </button>
         </div>
       </div>
@@ -402,6 +411,7 @@ function PrivateModal({member,groupName,onConfirm,onCancel}) {
 
 // ─── NICK (klikalny w grupie) ────────────────────────────────────────────────
 function Nick({senderId,name,members,onPrivate}) {
+  const {t}=useI18n();
   const [hov,setHov]=useState(false);
   const m=members[senderId];
   if(!m) return <span style={{fontSize:9,color:C.dim,fontFamily:F}}>{name}</span>;
@@ -409,7 +419,7 @@ function Nick({senderId,name,members,onPrivate}) {
     <button
       onMouseEnter={()=>setHov(true)} onMouseLeave={()=>setHov(false)}
       onClick={()=>onPrivate(m)}
-      title="Prywatna rozmowa"
+      title={t("nick.title")}
       style={{background:"none",border:"none",cursor:"pointer",padding:0,display:"inline-flex",alignItems:"center",gap:4}}>
       <span style={{fontSize:9,fontFamily:F,color:hov?C.purple:C.dim,textDecoration:hov?"underline":"none",transition:"color 0.15s"}}>{name}</span>
       {hov && <Ico name="lock" size={9} color={C.purple}/>}
@@ -419,18 +429,19 @@ function Nick({senderId,name,members,onPrivate}) {
 
 // ─── WIADOMOŚĆ ────────────────────────────────────────────────────────────────
 function Msg({m,isGroup,members,onPrivate}) {
+  const {t}=useI18n();
   const isMe=m.from==="me";
   const [rem,setRem]=useState(m.rem??m.ttl??0);
   useEffect(()=>{
     if(!m.eph) return;
-    const t=setInterval(()=>setRem(r=>Math.max(0,r-1)),1000);
-    return ()=>clearInterval(t);
+    const iv=setInterval(()=>setRem(r=>Math.max(0,r-1)),1000);
+    return ()=>clearInterval(iv);
   },[m.id]);
-  const fmt=s=>s<=0?"usunięto":s<60?`${s}s`:s<3600?`${Math.floor(s/60)}m ${s%60}s`:`${Math.floor(s/3600)}h`;
+  const fmt=s=>s<=0?t("message.deleted"):s<60?t("message.unitS",{s}):s<3600?t("message.unitMS",{m:Math.floor(s/60),s:s%60}):t("message.unitH",{h:Math.floor(s/3600)});
 
   if(m.eph&&rem<=0) return (
     <div style={{display:"flex",justifyContent:isMe?"flex-end":"flex-start",marginBottom:8}}>
-      <span style={{fontSize:10,color:C.faint,fontFamily:F,fontStyle:"italic"}}>[wiadomość usunięta]</span>
+      <span style={{fontSize:10,color:C.faint,fontFamily:F,fontStyle:"italic"}}>{t("message.deletedInline")}</span>
     </div>
   );
 
@@ -457,10 +468,10 @@ function Msg({m,isGroup,members,onPrivate}) {
         {m.eph&&(
           <div style={{display:"flex",alignItems:"center",gap:5,marginBottom:5}}>
             <Ico name="clock" size={10} color={C.yellow}/>
-            <span style={{fontSize:9,color:C.yellow,fontFamily:F}}>efemeryczna · {fmt(rem)}</span>
+            <span style={{fontSize:9,color:C.yellow,fontFamily:F}}>{t("message.ephemeral",{time:fmt(rem)})}</span>
           </div>
         )}
-        <div style={{fontSize:13,color:C.text,fontFamily:F,lineHeight:1.55,opacity:m.eph&&rem<30?0.4:1,transition:"opacity 1s"}}>{m.text}</div>
+        <div style={{fontSize:13,color:C.text,fontFamily:F,lineHeight:1.55,opacity:m.eph&&rem<30?0.4:1,transition:"opacity 1s"}}>{m.text ?? (m.tk ? t(m.tk) : "")}</div>
         <div style={{fontSize:9,color:C.dim,marginTop:4,fontFamily:F,textAlign:isMe?"right":"left"}}>{m.ts}{isMe&&" · ✓"}</div>
       </div>
     </div>
@@ -469,14 +480,12 @@ function Msg({m,isGroup,members,onPrivate}) {
 
 // ─── MODAL: PODGLĄD ZDJĘCIA PRZED WYSYŁKĄ ────────────────────────────────────
 function PhotoPreviewModal({dataUrl, onSend, onCancel}) {
+  const {t}=useI18n();
   const [stage, setStage] = useState("preview"); // preview | processing | ready
   const [progress, setProgress] = useState(0);
-  const [steps, setSteps] = useState([
-    {label:"usuwanie metadanych GPS",    done:false, active:false},
-    {label:"usuwanie danych urządzenia", done:false, active:false},
-    {label:"re-kompresja obrazu",        done:false, active:false},
-    {label:"szyfrowanie Signal",         done:false, active:false},
-  ]);
+  const [steps, setSteps] = useState(
+    t("photo.steps").map(label => ({label, done:false, active:false}))
+  );
 
   const runProcessing = () => {
     setStage("processing");
@@ -502,7 +511,7 @@ function PhotoPreviewModal({dataUrl, onSend, onCancel}) {
           <div style={{display:"flex",alignItems:"center",gap:8}}>
             <Ico name="camera" size={16} color={C.green}/>
             <span style={{fontSize:12,color:C.green,letterSpacing:1}}>
-              {stage==="preview"?"PODGLĄD":stage==="processing"?"SANITYZACJA...":"GOTOWE DO WYSYŁKI"}
+              {stage==="preview"?t("photo.headerPreview"):stage==="processing"?t("photo.headerProcessing"):t("photo.headerReady")}
             </span>
           </div>
           {stage==="preview"&&(
@@ -522,7 +531,7 @@ function PhotoPreviewModal({dataUrl, onSend, onCancel}) {
           {/* Overlay processing */}
           {stage==="processing"&&(
             <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:8}}>
-              <div style={{fontSize:11,color:C.green,fontFamily:F,letterSpacing:1}}>SANITYZACJA</div>
+              <div style={{fontSize:11,color:C.green,fontFamily:F,letterSpacing:1}}>{t("photo.overlaySanitizing")}</div>
               {/* Animowany scan-line */}
               <div style={{width:"80%",height:2,background:C.green,boxShadow:`0 0 8px ${C.green}`,animation:"scanline 1s linear infinite"}}/>
             </div>
@@ -532,7 +541,7 @@ function PhotoPreviewModal({dataUrl, onSend, onCancel}) {
           {stage==="ready"&&(
             <div style={{position:"absolute",top:8,right:8,background:"rgba(0,0,0,0.75)",borderRadius:3,padding:"4px 8px",display:"flex",alignItems:"center",gap:5}}>
               <Ico name="check" size={11} color={C.green}/>
-              <span style={{fontSize:9,color:C.green,fontFamily:F}}>EXIF usunięty</span>
+              <span style={{fontSize:9,color:C.green,fontFamily:F}}>{t("photo.exifRemoved")}</span>
             </div>
           )}
         </div>
@@ -561,12 +570,9 @@ function PhotoPreviewModal({dataUrl, onSend, onCancel}) {
         {/* Info o prywatności — tylko w preview */}
         {stage==="preview"&&(
           <div style={{background:"rgba(0,255,135,0.04)",border:"1px solid rgba(0,255,135,0.12)",borderRadius:3,padding:"10px 12px",marginBottom:12}}>
-            <div style={{fontSize:9,color:C.green,letterSpacing:1,marginBottom:5}}>PRZED WYSYŁKĄ ZOSTANIE USUNIĘTE</div>
+            <div style={{fontSize:9,color:C.green,letterSpacing:1,marginBottom:5}}>{t("photo.willRemoveTitle")}</div>
             <div style={{fontSize:9,color:C.dim,lineHeight:1.8}}>
-              · GPS i lokalizacja z EXIF<br/>
-              · model i numer seryjny aparatu<br/>
-              · data i godzina wykonania zdjęcia<br/>
-              · miniatura i inne metadane
+              {t("photo.willRemoveBullets").map((b,i)=><React.Fragment key={i}>{b}<br/></React.Fragment>)}
             </div>
           </div>
         )}
@@ -575,17 +581,17 @@ function PhotoPreviewModal({dataUrl, onSend, onCancel}) {
         {stage==="preview"&&(
           <div style={{display:"flex",gap:8}}>
             <button onClick={onCancel} style={{flex:1,padding:"10px 0",background:"none",border:`1px solid ${C.border}`,borderRadius:3,cursor:"pointer",color:C.dim,fontSize:11,fontFamily:F,letterSpacing:0.8,display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
-              <Ico name="trash" size={12} color={C.dim}/>ANULUJ
+              <Ico name="trash" size={12} color={C.dim}/>{t("photo.cancel")}
             </button>
             <button onClick={runProcessing} style={{flex:2,padding:"10px 0",background:C.greenFaint,border:"1px solid rgba(0,255,135,0.3)",borderRadius:3,cursor:"pointer",color:C.green,fontSize:11,fontFamily:F,letterSpacing:0.8,display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
-              <Ico name="lock" size={12} color={C.green}/>SANITYZUJ I WYŚLIJ
+              <Ico name="lock" size={12} color={C.green}/>{t("photo.sanitizeAndSend")}
             </button>
           </div>
         )}
 
         {stage==="ready"&&(
           <button onClick={()=>onSend(dataUrl)} style={{width:"100%",padding:"11px 0",background:C.green,border:"none",borderRadius:3,cursor:"pointer",color:C.bg,fontSize:12,fontFamily:F,letterSpacing:0.8,display:"flex",alignItems:"center",justifyContent:"center",gap:8,fontWeight:500}}>
-            <Ico name="send" size={14} color={C.bg}/>WYŚLIJ ZASZYFROWANE
+            <Ico name="send" size={14} color={C.bg}/>{t("photo.sendEncrypted")}
           </button>
         )}
       </div>
@@ -597,6 +603,7 @@ function PhotoPreviewModal({dataUrl, onSend, onCancel}) {
 
 // ─── WIADOMOŚĆ ZE ZDJĘCIEM ────────────────────────────────────────────────────
 function PhotoMsg({m, isMe}) {
+  const {t}=useI18n();
   const [fullscreen, setFullscreen] = useState(false);
   return (
     <>
@@ -606,7 +613,7 @@ function PhotoMsg({m, isMe}) {
           <div style={{position:"absolute",bottom:0,left:0,right:0,padding:"6px 8px",background:"linear-gradient(transparent,rgba(0,0,0,0.7))",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
             <div style={{display:"flex",alignItems:"center",gap:4}}>
               <Ico name="lock" size={9} color={C.green}/>
-              <span style={{fontSize:8,color:C.green,fontFamily:F}}>e2e · exif usunięty</span>
+              <span style={{fontSize:8,color:C.green,fontFamily:F}}>{t("photo.msgCaption")}</span>
             </div>
             <span style={{fontSize:8,color:"rgba(255,255,255,0.5)",fontFamily:F}}>{m.ts}{isMe&&" · ✓"}</span>
           </div>
@@ -620,7 +627,7 @@ function PhotoMsg({m, isMe}) {
           </button>
           <div style={{position:"absolute",bottom:20,left:"50%",transform:"translateX(-50%)",background:"rgba(0,0,0,0.75)",borderRadius:3,padding:"6px 12px",display:"flex",alignItems:"center",gap:6}}>
             <Ico name="lock" size={11} color={C.green}/>
-            <span style={{fontSize:10,color:C.green,fontFamily:F}}>zaszyfrowane · metadane usunięte</span>
+            <span style={{fontSize:10,color:C.green,fontFamily:F}}>{t("photo.fullscreenCaption")}</span>
           </div>
         </div>
       )}
@@ -642,14 +649,16 @@ const makeFingerprint = (seed="") => {
   return out;
 };
 
+// Rola każdego węzła (role) brana z tłumaczeń po indeksie: torNodes.roles[i]
 const TOR_NODES = [
-  {role:"Entry Guard",   country:"🇩🇪", city:"Frankfurt",  ip:"185.220.xxx.xxx", latency:"12ms",  color:C.green},
-  {role:"Middle Relay",  country:"🇳🇱", city:"Amsterdam",  ip:"194.165.xxx.xxx", latency:"28ms",  color:C.green},
-  {role:"Exit Relay",    country:"🇸🇪", city:"Stockholm",  ip:"192.42.xxx.xxx",  latency:"41ms",  color:C.green},
+  {country:"🇩🇪", city:"Frankfurt",  ip:"185.220.xxx.xxx", latency:"12ms",  color:C.green},
+  {country:"🇳🇱", city:"Amsterdam",  ip:"194.165.xxx.xxx", latency:"28ms",  color:C.green},
+  {country:"🇸🇪", city:"Stockholm",  ip:"192.42.xxx.xxx",  latency:"41ms",  color:C.green},
 ];
 
 // ─── MODAL: E2E STATUS ────────────────────────────────────────────────────────
 function E2EModal({chat, onClose}) {
+  const {t}=useI18n();
   const [verified, setVerified] = useState(false);
   const [copied,   setCopied]   = useState(false);
   const fp = makeFingerprint((chat?.onion||"")+(chat?.name||""));
@@ -672,8 +681,8 @@ function E2EModal({chat, onClose}) {
               <Ico name="lock" size={18} color={C.green}/>
             </div>
             <div>
-              <div style={{fontSize:13,color:C.text}}>szyfrowanie end-to-end</div>
-              <div style={{fontSize:9,color:C.dim,marginTop:2}}>signal protocol · double ratchet</div>
+              <div style={{fontSize:13,color:C.text}}>{t("e2e.title")}</div>
+              <div style={{fontSize:9,color:C.dim,marginTop:2}}>{t("e2e.subtitle")}</div>
             </div>
           </div>
           <button onClick={onClose} style={{background:"none",border:"none",cursor:"pointer",display:"flex"}}><Ico name="x" size={18} color={C.dim}/></button>
@@ -684,20 +693,17 @@ function E2EModal({chat, onClose}) {
           <Ico name={verified?"check":"alert"} size={18} color={verified?C.green:C.yellow}/>
           <div>
             <div style={{fontSize:11,color:verified?C.green:C.yellow,fontFamily:F,marginBottom:2}}>
-              {verified?"klucz zweryfikowany osobiście":"klucz niezweryfikowany"}
+              {verified?t("e2e.verifiedStatus"):t("e2e.notVerifiedStatus")}
             </div>
             <div style={{fontSize:9,color:C.dim,lineHeight:1.6}}>
-              {verified
-                ?"rozmowa jest bezpieczna. nikt nie jest pośrodku."
-                :"porównaj fingerprint z rozmówcą osobiście lub przez inny kanał."
-              }
+              {verified?t("e2e.verifiedDesc"):t("e2e.notVerifiedDesc")}
             </div>
           </div>
         </div>
 
         {/* Fingerprint kontaktu */}
         <div style={{marginBottom:14}}>
-          <div style={{fontSize:9,color:C.dim,letterSpacing:1,marginBottom:8}}>FINGERPRINT — {(chat?.name||"kontakt").toUpperCase()}</div>
+          <div style={{fontSize:9,color:C.dim,letterSpacing:1,marginBottom:8}}>{t("e2e.fingerprintOf",{name:(chat?.name||t("e2e.contactFallback")).toUpperCase()})}</div>
           <div style={{background:C.bg,border:`1px solid ${C.border}`,borderRadius:3,padding:"12px 14px",marginBottom:6}}>
             <div style={{fontSize:13,color:C.green,fontFamily:F,letterSpacing:2,lineHeight:2,wordBreak:"break-all",textAlign:"center"}}>
               {fp.split(" ").map((chunk,i)=>(
@@ -707,13 +713,13 @@ function E2EModal({chat, onClose}) {
           </div>
           <button onClick={copyFp} style={{width:"100%",padding:"7px 0",background:"none",border:`1px solid ${C.border}`,borderRadius:3,cursor:"pointer",color:copied?C.green:C.dim,fontSize:10,fontFamily:F,display:"flex",alignItems:"center",justifyContent:"center",gap:6,transition:"color 0.2s"}}>
             <Ico name="check" size={11} color={copied?C.green:C.dim}/>
-            {copied?"skopiowano!":"kopiuj fingerprint"}
+            {copied?t("e2e.copied"):t("e2e.copyFp")}
           </button>
         </div>
 
         {/* Fingerprint własny */}
         <div style={{marginBottom:16}}>
-          <div style={{fontSize:9,color:C.dim,letterSpacing:1,marginBottom:8}}>TWÓJ FINGERPRINT</div>
+          <div style={{fontSize:9,color:C.dim,letterSpacing:1,marginBottom:8}}>{t("e2e.yourFingerprint")}</div>
           <div style={{background:C.bg,border:`1px solid ${C.border}`,borderRadius:3,padding:"10px 14px"}}>
             <div style={{fontSize:11,color:C.dim,fontFamily:F,letterSpacing:1.5,lineHeight:1.8,wordBreak:"break-all",textAlign:"center"}}>
               {myFp.split(" ").map((chunk,i)=>(
@@ -725,22 +731,19 @@ function E2EModal({chat, onClose}) {
 
         {/* Jak weryfikować */}
         <div style={{background:"rgba(0,0,0,0.3)",border:`1px solid ${C.border}`,borderRadius:3,padding:"10px 14px",marginBottom:16}}>
-          <div style={{fontSize:9,color:C.dim,letterSpacing:1,marginBottom:6}}>JAK WERYFIKOWAĆ</div>
+          <div style={{fontSize:9,color:C.dim,letterSpacing:1,marginBottom:6}}>{t("e2e.howToTitle")}</div>
           <div style={{fontSize:9,color:C.dim,lineHeight:1.9}}>
-            1. poproś {chat?.name||"kontakt"} aby odczytał swój fingerprint<br/>
-            2. porównaj z tym co widzisz powyżej<br/>
-            3. jeśli identyczne — potwierdź poniżej<br/>
-            4. jeśli różne — ktoś może być pośrodku
+            {t("e2e.howToSteps",{name:chat?.name||t("e2e.contactFallback")}).map((s,i)=><React.Fragment key={i}>{s}<br/></React.Fragment>)}
           </div>
         </div>
 
         {/* Szyfrowanie info */}
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:6,marginBottom:16}}>
           {[
-            ["protokół",    "Signal Protocol"],
-            ["wymiana kluczy","X3DH + Curve25519"],
-            ["szyfr",       "AES-256-GCM"],
-            ["forward secrecy","Double Ratchet"],
+            [t("e2e.grid.protocol"),       t("e2e.grid.protocolValue")],
+            [t("e2e.grid.keyExchange"),    t("e2e.grid.keyExchangeValue")],
+            [t("e2e.grid.cipher"),         t("e2e.grid.cipherValue")],
+            [t("e2e.grid.forwardSecrecy"), t("e2e.grid.forwardSecrecyValue")],
           ].map(([l,v])=>(
             <div key={l} style={{background:C.bg,border:`1px solid ${C.border}`,borderRadius:3,padding:"8px 10px"}}>
               <div style={{fontSize:8,color:C.dim,letterSpacing:1,marginBottom:3}}>{l.toUpperCase()}</div>
@@ -751,10 +754,10 @@ function E2EModal({chat, onClose}) {
 
         {/* Przyciski */}
         <div style={{display:"flex",gap:8}}>
-          <button onClick={onClose} style={{flex:1,padding:"10px 0",background:"none",border:`1px solid ${C.border}`,borderRadius:3,cursor:"pointer",color:C.dim,fontSize:11,fontFamily:F}}>ZAMKNIJ</button>
+          <button onClick={onClose} style={{flex:1,padding:"10px 0",background:"none",border:`1px solid ${C.border}`,borderRadius:3,cursor:"pointer",color:C.dim,fontSize:11,fontFamily:F}}>{t("e2e.close")}</button>
           <button onClick={()=>setVerified(v=>!v)} style={{flex:2,padding:"10px 0",background:verified?"rgba(255,180,0,0.08)":C.greenFaint,border:`1px solid ${verified?"rgba(255,180,0,0.3)":"rgba(0,255,135,0.3)"}`,borderRadius:3,cursor:"pointer",color:verified?C.yellow:C.green,fontSize:11,fontFamily:F,display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
             <Ico name={verified?"alert":"check"} size={12} color={verified?C.yellow:C.green}/>
-            {verified?"COFNIJ WERYFIKACJĘ":"POTWIERDZAM — KLUCZ ZGODNY"}
+            {verified?t("e2e.unverify"):t("e2e.confirmVerify")}
           </button>
         </div>
       </div>
@@ -764,6 +767,7 @@ function E2EModal({chat, onClose}) {
 
 // ─── MODAL: TOR STATUS ────────────────────────────────────────────────────────
 function TorModal({chat, onClose}) {
+  const {t}=useI18n();
   const [refreshing, setRefreshing] = useState(false);
   const [nodes,      setNodes]      = useState(TOR_NODES);
   const [totalLatency, setTotal]    = useState(81);
@@ -794,8 +798,8 @@ function TorModal({chat, onClose}) {
               <Ico name="wifi" size={18} color={C.green}/>
             </div>
             <div>
-              <div style={{fontSize:13,color:C.text}}>status sieci tor</div>
-              <div style={{fontSize:9,color:C.dim,marginTop:2}}>3-węzłowy obwód · onion routing</div>
+              <div style={{fontSize:13,color:C.text}}>{t("torModal.title")}</div>
+              <div style={{fontSize:9,color:C.dim,marginTop:2}}>{t("torModal.subtitle")}</div>
             </div>
           </div>
           <button onClick={onClose} style={{background:"none",border:"none",cursor:"pointer",display:"flex"}}><Ico name="x" size={18} color={C.dim}/></button>
@@ -805,14 +809,14 @@ function TorModal({chat, onClose}) {
         <div style={{background:"rgba(0,255,135,0.05)",border:"1px solid rgba(0,255,135,0.18)",borderRadius:4,padding:"10px 14px",marginBottom:16,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
           <div style={{display:"flex",alignItems:"center",gap:8}}>
             <div style={{width:8,height:8,borderRadius:"50%",background:C.green,boxShadow:`0 0 6px ${C.green}`}}/>
-            <span style={{fontSize:11,color:C.green,fontFamily:F}}>TOR AKTYWNY</span>
+            <span style={{fontSize:11,color:C.green,fontFamily:F}}>{t("torModal.active")}</span>
           </div>
-          <div style={{fontSize:9,color:C.dim}}>łączna latencja: <span style={{color:C.text}}>{refreshing?"...":totalLatency+"ms"}</span></div>
+          <div style={{fontSize:9,color:C.dim}}>{t("torModal.totalLatency")} <span style={{color:C.text}}>{refreshing?"...":totalLatency+"ms"}</span></div>
         </div>
 
         {/* Circuit ID */}
         <div style={{marginBottom:16}}>
-          <div style={{fontSize:9,color:C.dim,letterSpacing:1,marginBottom:6}}>ID OBWODU (CIRCUIT)</div>
+          <div style={{fontSize:9,color:C.dim,letterSpacing:1,marginBottom:6}}>{t("torModal.circuitId")}</div>
           <div style={{background:C.bg,border:`1px solid ${C.border}`,borderRadius:3,padding:"8px 12px",fontSize:10,color:C.green,fontFamily:F,letterSpacing:1,wordBreak:"break-all"}}>
             {circuitId}
           </div>
@@ -820,11 +824,11 @@ function TorModal({chat, onClose}) {
 
         {/* Węzły */}
         <div style={{marginBottom:16}}>
-          <div style={{fontSize:9,color:C.dim,letterSpacing:1,marginBottom:8}}>WĘZŁY OBWODU</div>
+          <div style={{fontSize:9,color:C.dim,letterSpacing:1,marginBottom:8}}>{t("torModal.circuitNodes")}</div>
 
           {/* Wizualizacja trasy */}
           <div style={{display:"flex",alignItems:"center",marginBottom:12,gap:0}}>
-            <div style={{fontSize:9,color:C.dim,fontFamily:F,padding:"4px 8px",background:C.bg,border:`1px solid ${C.border}`,borderRadius:3}}>TY</div>
+            <div style={{fontSize:9,color:C.dim,fontFamily:F,padding:"4px 8px",background:C.bg,border:`1px solid ${C.border}`,borderRadius:3}}>{t("torModal.you")}</div>
             {nodes.map((n,i)=>(
               <React.Fragment key={i}>
                 <div style={{flex:1,height:1,background:`linear-gradient(90deg,${C.green}44,${C.green})`,position:"relative"}}>
@@ -834,7 +838,7 @@ function TorModal({chat, onClose}) {
               </React.Fragment>
             ))}
             <div style={{flex:1,height:1,background:`linear-gradient(90deg,${C.green},${C.green}44)`}}/>
-            <div style={{fontSize:9,color:C.dim,fontFamily:F,padding:"4px 8px",background:C.bg,border:`1px solid ${C.border}`,borderRadius:3,maxWidth:80,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{chat?.name||"cel"}</div>
+            <div style={{fontSize:9,color:C.dim,fontFamily:F,padding:"4px 8px",background:C.bg,border:`1px solid ${C.border}`,borderRadius:3,maxWidth:80,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{chat?.name||t("torModal.targetFallback")}</div>
           </div>
 
           {/* Tabela węzłów */}
@@ -845,7 +849,7 @@ function TorModal({chat, onClose}) {
               </div>
               <div style={{flex:1,minWidth:0}}>
                 <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:2}}>
-                  <span style={{fontSize:10,color:C.text,fontFamily:F}}>{n.role}</span>
+                  <span style={{fontSize:10,color:C.text,fontFamily:F}}>{t("torNodes.roles")[i]}</span>
                   <span style={{fontSize:9,color:C.dim}}>{n.country} {n.city}</span>
                 </div>
                 <div style={{fontSize:9,color:C.dim,fontFamily:F}}>{n.ip}</div>
@@ -859,12 +863,8 @@ function TorModal({chat, onClose}) {
 
         {/* Co widzi każdy węzeł */}
         <div style={{background:"rgba(0,0,0,0.3)",border:`1px solid ${C.border}`,borderRadius:3,padding:"10px 14px",marginBottom:16}}>
-          <div style={{fontSize:9,color:C.dim,letterSpacing:1,marginBottom:8}}>CO WIDZI KAŻDY WĘZEŁ</div>
-          {[
-            ["węzeł 1 (entry)", "zna twój IP,  NIE zna odbiorcy ani treści"],
-            ["węzeł 2 (middle)","NIE zna ani nadawcy, ani odbiorcy"],
-            ["węzeł 3 (exit)",  "zna odbiorcę (.onion),  NIE zna twojego IP"],
-          ].map(([l,v])=>(
+          <div style={{fontSize:9,color:C.dim,letterSpacing:1,marginBottom:8}}>{t("torModal.whatEachSees")}</div>
+          {t("torModal.seesRows").map(({label:l,value:v})=>(
             <div key={l} style={{display:"flex",gap:8,marginBottom:5}}>
               <span style={{fontSize:9,color:C.green,flexShrink:0,minWidth:110}}>{l}</span>
               <span style={{fontSize:9,color:C.dim,lineHeight:1.5}}>{v}</span>
@@ -874,19 +874,19 @@ function TorModal({chat, onClose}) {
 
         {/* Cel połączenia */}
         <div style={{marginBottom:16}}>
-          <div style={{fontSize:9,color:C.dim,letterSpacing:1,marginBottom:6}}>CEL POŁĄCZENIA</div>
+          <div style={{fontSize:9,color:C.dim,letterSpacing:1,marginBottom:6}}>{t("torModal.target")}</div>
           <div style={{background:C.bg,border:`1px solid ${C.border}`,borderRadius:3,padding:"8px 12px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-            <span style={{fontSize:9,color:C.dim}}>adres hidden service</span>
-            <span style={{fontSize:9,color:C.green,fontFamily:F}}>{shortOnion(chat?.onion)||"n/d"}</span>
+            <span style={{fontSize:9,color:C.dim}}>{t("torModal.hiddenServiceAddr")}</span>
+            <span style={{fontSize:9,color:C.green,fontFamily:F}}>{shortOnion(chat?.onion)||t("torModal.na")}</span>
           </div>
         </div>
 
         {/* Przyciski */}
         <div style={{display:"flex",gap:8}}>
-          <button onClick={onClose} style={{flex:1,padding:"10px 0",background:"none",border:`1px solid ${C.border}`,borderRadius:3,cursor:"pointer",color:C.dim,fontSize:11,fontFamily:F}}>ZAMKNIJ</button>
+          <button onClick={onClose} style={{flex:1,padding:"10px 0",background:"none",border:`1px solid ${C.border}`,borderRadius:3,cursor:"pointer",color:C.dim,fontSize:11,fontFamily:F}}>{t("torModal.close")}</button>
           <button onClick={refresh} disabled={refreshing} style={{flex:2,padding:"10px 0",background:C.greenFaint,border:"1px solid rgba(0,255,135,0.3)",borderRadius:3,cursor:refreshing?"default":"pointer",color:C.green,fontSize:11,fontFamily:F,display:"flex",alignItems:"center",justifyContent:"center",gap:8,opacity:refreshing?0.6:1}}>
             <Ico name="wifi" size={12} color={C.green}/>
-            {refreshing?"budowanie nowego obwodu...":"NOWY OBWÓD TOR"}
+            {refreshing?t("torModal.building"):t("torModal.newCircuit")}
           </button>
         </div>
       </div>
@@ -896,6 +896,7 @@ function TorModal({chat, onClose}) {
 
 // ─── PANEL CZATU ──────────────────────────────────────────────────────────────
 function ChatPanel({chat, onPrivate, onBack, onToggleRight, onInfoOpen, rightOpen}) {
+  const {t,lang}=useI18n();
   const [input,setInput]=useState("");
   const [ttl,setTTL]=useState(null);
   const [msgs,setMsgs]=useState([]);
@@ -915,7 +916,7 @@ function ChatPanel({chat, onPrivate, onBack, onToggleRight, onInfoOpen, rightOpe
 
   const send=()=>{
     if(!input.trim()) return;
-    setMsgs(ms=>[...ms,{id:Date.now(),from:"me",text:input,ts:new Date().toLocaleTimeString("pl",{hour:"2-digit",minute:"2-digit"}),eph:ttl!==null,ttl,rem:ttl}]);
+    setMsgs(ms=>[...ms,{id:Date.now(),from:"me",text:input,ts:new Date().toLocaleTimeString(lang,{hour:"2-digit",minute:"2-digit"}),eph:ttl!==null,ttl,rem:ttl}]);
     setInput("");
     inputRef.current?.focus();
   };
@@ -934,7 +935,7 @@ function ChatPanel({chat, onPrivate, onBack, onToggleRight, onInfoOpen, rightOpe
     setPhotoPreview(null);
     setMsgs(ms=>[...ms,{
       id:Date.now(), from:"me", type:"photo", photoUrl:dataUrl,
-      ts:new Date().toLocaleTimeString("pl",{hour:"2-digit",minute:"2-digit"}),
+      ts:new Date().toLocaleTimeString(lang,{hour:"2-digit",minute:"2-digit"}),
       eph:ttl!==null, ttl, rem:ttl,
     }]);
   };
@@ -946,8 +947,8 @@ function ChatPanel({chat, onPrivate, onBack, onToggleRight, onInfoOpen, rightOpe
   if(!chat) return (
     <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",background:C.bg,fontFamily:F}}>
       <Logo size={56}/>
-      <div style={{marginTop:20,fontSize:13,color:C.dim}}>wybierz kontakt lub grupę</div>
-      <div style={{marginTop:6,fontSize:10,color:C.faint}}>wszystkie połączenia przez tor</div>
+      <div style={{marginTop:20,fontSize:13,color:C.dim}}>{t("chat.emptyTitle")}</div>
+      <div style={{marginTop:6,fontSize:10,color:C.faint}}>{t("chat.emptySubtitle")}</div>
     </div>
   );
 
@@ -973,13 +974,13 @@ function ChatPanel({chat, onPrivate, onBack, onToggleRight, onInfoOpen, rightOpe
           <div style={{minWidth:0}}>
             <div style={{display:"flex",alignItems:"center",gap:8}}>
               <span style={{fontSize:13,color:C.text,fontFamily:F,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{chat.name}</span>
-              {isPriv&&<span style={{fontSize:9,color:C.purple,background:C.purpleFaint,border:"1px solid rgba(155,109,255,0.25)",borderRadius:2,padding:"1px 6px",letterSpacing:1,flexShrink:0}}>PRYWATNY</span>}
+              {isPriv&&<span style={{fontSize:9,color:C.purple,background:C.purpleFaint,border:"1px solid rgba(155,109,255,0.25)",borderRadius:2,padding:"1px 6px",letterSpacing:1,flexShrink:0}}>{t("chat.privateBadge")}</span>}
             </div>
             <div style={{fontSize:9,color:C.dim,fontFamily:F,marginTop:2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
               {isGroup
-                ? `${chat.memberIds?.length||0} członków · epoch=${chat.epoch}`
+                ? t("chat.membersEpoch",{count:chat.memberIds?.length||0,epoch:chat.epoch})
                 : isPriv
-                  ? `prywatny kanał · ${shortOnion(chat.onion)}`
+                  ? t("chat.privateChannel",{onion:shortOnion(chat.onion)})
                   : shortOnion(chat.onion)
               }
             </div>
@@ -987,14 +988,14 @@ function ChatPanel({chat, onPrivate, onBack, onToggleRight, onInfoOpen, rightOpe
         </div>
         <div style={{display:"flex",gap:6,flexShrink:0}}>
           {/* E2E — klikalny */}
-          <button onClick={()=>setShowE2E(true)} title="Status szyfrowania E2E" style={{display:"flex",alignItems:"center",gap:4,background:C.greenFaint,border:"1px solid rgba(0,255,135,0.25)",borderRadius:2,padding:"3px 7px",cursor:"pointer",transition:"background 0.15s"}}
+          <button onClick={()=>setShowE2E(true)} title={t("chat.titleE2E")} style={{display:"flex",alignItems:"center",gap:4,background:C.greenFaint,border:"1px solid rgba(0,255,135,0.25)",borderRadius:2,padding:"3px 7px",cursor:"pointer",transition:"background 0.15s"}}
             onMouseEnter={e=>e.currentTarget.style.background="rgba(0,255,135,0.16)"}
             onMouseLeave={e=>e.currentTarget.style.background=C.greenFaint}>
             <Ico name="lock" size={10} color={C.green}/>
             <span style={{fontSize:9,color:C.green,fontFamily:F,letterSpacing:0.8}}>E2E</span>
           </button>
           {/* TOR — klikalny */}
-          <button onClick={()=>setShowTor(true)} title="Status sieci Tor" style={{display:"flex",alignItems:"center",gap:4,background:"rgba(255,255,255,0.03)",border:`1px solid ${C.border}`,borderRadius:2,padding:"3px 7px",cursor:"pointer",transition:"background 0.15s"}}
+          <button onClick={()=>setShowTor(true)} title={t("chat.titleTor")} style={{display:"flex",alignItems:"center",gap:4,background:"rgba(255,255,255,0.03)",border:`1px solid ${C.border}`,borderRadius:2,padding:"3px 7px",cursor:"pointer",transition:"background 0.15s"}}
             onMouseEnter={e=>e.currentTarget.style.background="rgba(255,255,255,0.07)"}
             onMouseLeave={e=>e.currentTarget.style.background="rgba(255,255,255,0.03)"}>
             <Ico name="wifi" size={10} color={C.dim}/>
@@ -1002,12 +1003,12 @@ function ChatPanel({chat, onPrivate, onBack, onToggleRight, onInfoOpen, rightOpe
           </button>
           {/* Przycisk info / toggle prawego panelu */}
           {onInfoOpen && (
-            <button onClick={onInfoOpen} title="Szczegóły" style={{background:"none",border:`1px solid ${C.border}`,borderRadius:2,padding:"3px 6px",cursor:"pointer",display:"flex",alignItems:"center"}}>
+            <button onClick={onInfoOpen} title={t("chat.titleInfo")} style={{background:"none",border:`1px solid ${C.border}`,borderRadius:2,padding:"3px 6px",cursor:"pointer",display:"flex",alignItems:"center"}}>
               <Ico name="info" size={13} color={C.dim}/>
             </button>
           )}
           {onToggleRight && (
-            <button onClick={onToggleRight} title={rightOpen?"Zamknij panel":"Otwórz panel"} style={{background:"none",border:`1px solid ${C.border}`,borderRadius:2,padding:"3px 6px",cursor:"pointer",display:"flex",alignItems:"center"}}>
+            <button onClick={onToggleRight} title={rightOpen?t("chat.titleClosePanel"):t("chat.titleOpenPanel")} style={{background:"none",border:`1px solid ${C.border}`,borderRadius:2,padding:"3px 6px",cursor:"pointer",display:"flex",alignItems:"center"}}>
               <Ico name={rightOpen?"chevRight":"info"} size={13} color={C.dim}/>
             </button>
           )}
@@ -1018,7 +1019,7 @@ function ChatPanel({chat, onPrivate, onBack, onToggleRight, onInfoOpen, rightOpe
       {isPriv&&(
         <div style={{padding:"7px 16px",background:"rgba(155,109,255,0.06)",borderBottom:"1px solid rgba(155,109,255,0.14)",display:"flex",alignItems:"center",gap:8,flexShrink:0}}>
           <Ico name="eyeoff" size={11} color={C.purple}/>
-          <span style={{fontSize:10,color:C.purple,fontFamily:F}}>niewidoczna dla pozostałych członków · {chat.fromGroup}</span>
+          <span style={{fontSize:10,color:C.purple,fontFamily:F}}>{t("chat.privBanner",{group:chat.fromGroup})}</span>
         </div>
       )}
 
@@ -1027,7 +1028,7 @@ function ChatPanel({chat, onPrivate, onBack, onToggleRight, onInfoOpen, rightOpe
         {msgs.length===0&&(
           <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:10,opacity:0.4}}>
             <Ico name={isPriv?"eyeoff":"lock"} size={28} color={C.faint}/>
-            <span style={{fontSize:11,color:C.faint,fontFamily:F}}>{isPriv?"zacznij prywatną rozmowę":"brak wiadomości"}</span>
+            <span style={{fontSize:11,color:C.faint,fontFamily:F}}>{isPriv?t("chat.emptyPriv"):t("chat.emptyMsgs")}</span>
           </div>
         )}
         {msgs.map(m=><Msg key={m.id} m={m} isGroup={isGroup} members={grpMembers} onPrivate={onPrivate}/>)}
@@ -1037,7 +1038,7 @@ function ChatPanel({chat, onPrivate, onBack, onToggleRight, onInfoOpen, rightOpe
       {/* TTL */}
       <div style={{padding:"6px 16px 0",display:"flex",alignItems:"center",gap:8,flexShrink:0}}>
         <Ico name="clock" size={11} color={C.faint}/>
-        <span style={{fontSize:9,color:C.faint,fontFamily:F}}>czas życia:</span>
+        <span style={{fontSize:9,color:C.faint,fontFamily:F}}>{t("chat.ttlLabel")}</span>
         {[null,30,300,3600].map(t=>(
           <button key={String(t)} onClick={()=>setTTL(t)} style={{padding:"2px 8px",borderRadius:2,background:ttl===t?accentFt:"none",border:`1px solid ${ttl===t?accent+"55":C.border}`,cursor:"pointer",fontSize:9,color:ttl===t?accent:C.dim,fontFamily:F}}>
             {t===null?"∞":t===30?"30s":t===300?"5m":"1h"}
@@ -1062,7 +1063,7 @@ function ChatPanel({chat, onPrivate, onBack, onToggleRight, onInfoOpen, rightOpe
           style={{width:40,height:40,background:C.surface,border:`1px solid ${C.border}`,borderRadius:3,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,transition:"border-color 0.15s"}}
           onMouseEnter={e=>e.currentTarget.style.borderColor=C.green}
           onMouseLeave={e=>e.currentTarget.style.borderColor=C.border}
-          title="Wyślij zdjęcie (EXIF zostanie usunięty)"
+          title={t("chat.cameraTitle")}
         >
           <Ico name="camera" size={16} color={C.dim}/>
         </button>
@@ -1073,7 +1074,7 @@ function ChatPanel({chat, onPrivate, onBack, onToggleRight, onInfoOpen, rightOpe
             ref={inputRef} value={input}
             onChange={e=>setInput(e.target.value)}
             onKeyDown={e=>{ if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send();} }}
-            placeholder={isPriv?"wiadomość prywatna...":ttl!==null?"wiadomość efemeryczna...":"wiadomość..."}
+            placeholder={isPriv?t("chat.placeholderPriv"):ttl!==null?t("chat.placeholderEph"):t("chat.placeholderNormal")}
             style={{flex:1,background:"none",border:"none",outline:"none",color:C.text,fontSize:13,fontFamily:F,padding:"10px 0"}}
           />
         </div>
@@ -1101,28 +1102,26 @@ function ChatPanel({chat, onPrivate, onBack, onToggleRight, onInfoOpen, rightOpe
 }
 
 // ─── HELPERS: ETYKIETY ───────────────────────────────────────────────────────
+// Same wartości + ikona/kolor. Etykiety i opisy pochodzą z tłumaczeń (patrz *Label/*Desc niżej).
 const VISIBILITY_OPTS = [
-  { val:"HIDDEN",  label:"Ukryta",    desc:"Niewidoczna w sieci. Tylko zaproszeni wiedzą że istnieje.", icon:"eyeoff", color:"#9B6DFF" },
-  { val:"PRIVATE", label:"Prywatna",  desc:"Istnienie widoczne w sieci, treść i członkowie zaszyfrowane.", icon:"lock",   color:"#FFB800" },
-  { val:"PUBLIC",  label:"Publiczna", desc:"Każdy węzeł w sieci może ją znaleźć i poprosić o dołączenie.", icon:"wifi",   color:"#00FF87" },
+  { val:"HIDDEN",  icon:"eyeoff", color:"#9B6DFF" },
+  { val:"PRIVATE", icon:"lock",   color:"#FFB800" },
+  { val:"PUBLIC",  icon:"wifi",   color:"#00FF87" },
 ];
-const INVITE_OPTS = [
-  { val:"FOUNDER_ONLY", label:"Tylko założyciel", desc:"Jedyna osoba mogąca zapraszać nowych członków." },
-  { val:"ADMINS_ONLY",  label:"Adminowie",        desc:"Wszyscy adminowie grupy mogą zapraszać." },
-  { val:"ANY_MEMBER",   label:"Każdy członek",    desc:"Każdy uczestnik może zapraszać znajomych." },
-];
-const TTL_OPTS = [
-  { val:null,    label:"Wyłączone",  desc:"Wiadomości nie znikają automatycznie." },
-  { val:60,      label:"1 minuta",   desc:"Wszystkie wiadomości znikają po 1 min." },
-  { val:300,     label:"5 minut",    desc:"Wszystkie wiadomości znikają po 5 min." },
-  { val:3600,    label:"1 godzina",  desc:"Wszystkie wiadomości znikają po 1h." },
-  { val:86400,   label:"24 godziny", desc:"Wszystkie wiadomości znikają po 24h." },
-];
+const INVITE_OPTS = [ {val:"FOUNDER_ONLY"}, {val:"ADMINS_ONLY"}, {val:"ANY_MEMBER"} ];
+const TTL_OPTS    = [ {val:null}, {val:60}, {val:300}, {val:3600}, {val:86400} ];
+
 const visIcon  = v => VISIBILITY_OPTS.find(o=>o.val===v)?.icon  || "lock";
 const visColor = v => VISIBILITY_OPTS.find(o=>o.val===v)?.color || C.green;
-const visLabel = v => VISIBILITY_OPTS.find(o=>o.val===v)?.label || v;
-const invLabel = v => INVITE_OPTS.find(o=>o.val===v)?.label     || v;
-const ttlLabel = v => TTL_OPTS.find(o=>String(o.val)===String(v))?.label || "Wyłączone";
+const visLabel = (t,v) => t(`group.visibility.${v}.label`);
+const visDesc  = (t,v) => t(`group.visibility.${v}.desc`);
+const invLabel = (t,v) => t(`group.invite.${v}.label`);
+const invDesc  = (t,v) => t(`group.invite.${v}.desc`);
+const ttlLabel = (t,v) => t(`group.ttl.${ttlKey(v)}.label`);
+const ttlDesc  = (t,v) => t(`group.ttl.${ttlKey(v)}.desc`);
+// Buduje zlokalizowaną opcję {val,label,desc} do przekazania RadioOpt.
+const locVis = (t,o) => ({...o, label:visLabel(t,o.val), desc:visDesc(t,o.val)});
+const locInv = (t,o) => ({...o, label:invLabel(t,o.val), desc:invDesc(t,o.val)});
 
 // ─── RADIO OPTION ────────────────────────────────────────────────────────────
 function RadioOpt({opt, selected, onSelect, accent=C.green}) {
@@ -1142,6 +1141,7 @@ function RadioOpt({opt, selected, onSelect, accent=C.green}) {
 
 // ─── MODAL: TWORZENIE GRUPY ──────────────────────────────────────────────────
 function CreateGroupModal({contacts, onCreateGroup, onClose}) {
+  const {t}=useI18n();
   const [step,       setStep]      = useState(1); // 1=nazwa, 2=ustawienia, 3=członkowie
   const [name,       setName]      = useState("");
   const [visibility, setVis]       = useState("HIDDEN");
@@ -1153,7 +1153,7 @@ function CreateGroupModal({contacts, onCreateGroup, onClose}) {
   const toggleMember = id => setSelected(s => s.includes(id) ? s.filter(x=>x!==id) : [...s,id]);
 
   const goStep2 = () => {
-    if (!name.trim()) { setNameErr("podaj nazwę grupy"); return; }
+    if (!name.trim()) { setNameErr(t("createGroup.nameErr")); return; }
     setNameErr(""); setStep(2);
   };
 
@@ -1180,8 +1180,8 @@ function CreateGroupModal({contacts, onCreateGroup, onClose}) {
               <Ico name="users" size={16} color={C.green}/>
             </div>
             <div>
-              <div style={{fontSize:13,color:C.text}}>nowa grupa</div>
-              <div style={{fontSize:9,color:C.dim,marginTop:2}}>krok {step} z 3</div>
+              <div style={{fontSize:13,color:C.text}}>{t("createGroup.title")}</div>
+              <div style={{fontSize:9,color:C.dim,marginTop:2}}>{t("createGroup.stepOf",{step})}</div>
             </div>
           </div>
           <button onClick={onClose} style={{background:"none",border:"none",cursor:"pointer",display:"flex"}}><Ico name="x" size={18} color={C.dim}/></button>
@@ -1197,20 +1197,20 @@ function CreateGroupModal({contacts, onCreateGroup, onClose}) {
         {/* KROK 1 — NAZWA */}
         {step===1&&(
           <div>
-            <div style={{fontSize:9,color:C.dim,letterSpacing:1,marginBottom:8}}>NAZWA GRUPY</div>
+            <div style={{fontSize:9,color:C.dim,letterSpacing:1,marginBottom:8}}>{t("createGroup.nameLabel")}</div>
             <input
               autoFocus value={name}
               onChange={e=>{setName(e.target.value);setNameErr("");}}
               onKeyDown={e=>e.key==="Enter"&&goStep2()}
-              placeholder="np. projekt_alfa"
+              placeholder={t("createGroup.namePlaceholder")}
               style={{width:"100%",background:C.bg,border:`1px solid ${nameErr?C.red:C.border}`,borderRadius:3,padding:"10px 12px",color:C.green,fontSize:14,fontFamily:F,outline:"none",letterSpacing:0.5,boxSizing:"border-box"}}
             />
             {nameErr&&<div style={{fontSize:9,color:C.red,marginTop:5}}>⚠ {nameErr}</div>}
-            <div style={{fontSize:9,color:C.dim,marginTop:6,lineHeight:1.6}}>nazwa widoczna tylko dla członków grupy</div>
+            <div style={{fontSize:9,color:C.dim,marginTop:6,lineHeight:1.6}}>{t("createGroup.nameHint")}</div>
             <div style={{display:"flex",gap:8,marginTop:20}}>
-              <button onClick={onClose} style={{flex:1,padding:"10px 0",background:"none",border:`1px solid ${C.border}`,borderRadius:3,cursor:"pointer",color:C.dim,fontSize:11,fontFamily:F}}>ANULUJ</button>
+              <button onClick={onClose} style={{flex:1,padding:"10px 0",background:"none",border:`1px solid ${C.border}`,borderRadius:3,cursor:"pointer",color:C.dim,fontSize:11,fontFamily:F}}>{t("createGroup.cancel")}</button>
               <button onClick={goStep2} style={{flex:2,padding:"10px 0",background:C.greenFaint,border:"1px solid rgba(0,255,135,0.3)",borderRadius:3,cursor:"pointer",color:C.green,fontSize:11,fontFamily:F,display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
-                DALEJ →
+                {t("createGroup.next")}
               </button>
             </div>
           </div>
@@ -1220,37 +1220,37 @@ function CreateGroupModal({contacts, onCreateGroup, onClose}) {
         {step===2&&(
           <div>
             {/* Widoczność */}
-            <div style={{fontSize:9,color:C.dim,letterSpacing:1,marginBottom:8}}>WIDOCZNOŚĆ GRUPY</div>
-            {VISIBILITY_OPTS.map(o=><RadioOpt key={o.val} opt={o} selected={visibility} onSelect={setVis} accent={o.color}/>)}
+            <div style={{fontSize:9,color:C.dim,letterSpacing:1,marginBottom:8}}>{t("createGroup.visibility")}</div>
+            {VISIBILITY_OPTS.map(o=><RadioOpt key={o.val} opt={locVis(t,o)} selected={visibility} onSelect={setVis} accent={o.color}/>)}
 
             <div style={{height:1,background:C.border,margin:"16px 0"}}/>
 
             {/* Polityka zaproszeń */}
-            <div style={{fontSize:9,color:C.dim,letterSpacing:1,marginBottom:8}}>KTO MOŻE ZAPRASZAĆ</div>
-            {INVITE_OPTS.map(o=><RadioOpt key={o.val} opt={o} selected={invPol} onSelect={setInvPol} accent={accentCol}/>)}
+            <div style={{fontSize:9,color:C.dim,letterSpacing:1,marginBottom:8}}>{t("createGroup.whoCanInvite")}</div>
+            {INVITE_OPTS.map(o=><RadioOpt key={o.val} opt={locInv(t,o)} selected={invPol} onSelect={setInvPol} accent={accentCol}/>)}
 
             <div style={{height:1,background:C.border,margin:"16px 0"}}/>
 
             {/* Wymuszone TTL */}
-            <div style={{fontSize:9,color:C.dim,letterSpacing:1,marginBottom:8}}>WYMUSZONE ZNIKANIE WIADOMOŚCI</div>
+            <div style={{fontSize:9,color:C.dim,letterSpacing:1,marginBottom:8}}>{t("createGroup.forcedTTL")}</div>
             <div style={{display:"flex",flexWrap:"wrap",gap:6,marginBottom:4}}>
               {TTL_OPTS.map(o=>{
                 const isSel=String(forcedTTL)===String(o.val);
                 return (
                   <button key={String(o.val)} onClick={()=>setForcedTTL(o.val)} style={{padding:"5px 10px",borderRadius:2,background:isSel?C.greenFaint:"none",border:`1px solid ${isSel?"rgba(0,255,135,0.4)":C.border}`,cursor:"pointer",fontSize:9,color:isSel?C.green:C.dim,fontFamily:F}}>
-                    {o.label}
+                    {ttlLabel(t,o.val)}
                   </button>
                 );
               })}
             </div>
             <div style={{fontSize:9,color:C.dim,lineHeight:1.6,marginBottom:20}}>
-              {TTL_OPTS.find(o=>String(o.val)===String(forcedTTL))?.desc}
+              {ttlDesc(t,forcedTTL)}
             </div>
 
             <div style={{display:"flex",gap:8}}>
-              <button onClick={()=>setStep(1)} style={{flex:1,padding:"10px 0",background:"none",border:`1px solid ${C.border}`,borderRadius:3,cursor:"pointer",color:C.dim,fontSize:11,fontFamily:F}}>← WRÓĆ</button>
+              <button onClick={()=>setStep(1)} style={{flex:1,padding:"10px 0",background:"none",border:`1px solid ${C.border}`,borderRadius:3,cursor:"pointer",color:C.dim,fontSize:11,fontFamily:F}}>{t("createGroup.back")}</button>
               <button onClick={()=>setStep(3)} style={{flex:2,padding:"10px 0",background:C.greenFaint,border:"1px solid rgba(0,255,135,0.3)",borderRadius:3,cursor:"pointer",color:C.green,fontSize:11,fontFamily:F,display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
-                DALEJ →
+                {t("createGroup.next")}
               </button>
             </div>
           </div>
@@ -1260,7 +1260,7 @@ function CreateGroupModal({contacts, onCreateGroup, onClose}) {
         {step===3&&(
           <div>
             <div style={{fontSize:9,color:C.dim,letterSpacing:1,marginBottom:8}}>
-              WYBIERZ CZŁONKÓW <span style={{color:C.green}}>({selected.length} wybranych)</span>
+              {t("createGroup.selectMembers")} <span style={{color:C.green}}>{t("createGroup.selectedCount",{count:selected.length})}</span>
             </div>
             <div style={{marginBottom:16}}>
               {contacts.map(c=>{
@@ -1285,28 +1285,28 @@ function CreateGroupModal({contacts, onCreateGroup, onClose}) {
             {/* Podsumowanie */}
             <div style={{background:C.bg,border:`1px solid ${C.border}`,borderRadius:3,padding:"10px 12px",marginBottom:16}}>
               <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
-                <span style={{fontSize:9,color:C.dim}}>nazwa</span>
+                <span style={{fontSize:9,color:C.dim}}>{t("createGroup.summaryName")}</span>
                 <span style={{fontSize:9,color:C.text}}>{name}</span>
               </div>
               <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
-                <span style={{fontSize:9,color:C.dim}}>widoczność</span>
-                <span style={{fontSize:9,color:visColor(visibility)}}>{visLabel(visibility)}</span>
+                <span style={{fontSize:9,color:C.dim}}>{t("createGroup.summaryVisibility")}</span>
+                <span style={{fontSize:9,color:visColor(visibility)}}>{visLabel(t,visibility)}</span>
               </div>
               <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
-                <span style={{fontSize:9,color:C.dim}}>zaproszenia</span>
-                <span style={{fontSize:9,color:C.text}}>{invLabel(invPol)}</span>
+                <span style={{fontSize:9,color:C.dim}}>{t("createGroup.summaryInvite")}</span>
+                <span style={{fontSize:9,color:C.text}}>{invLabel(t,invPol)}</span>
               </div>
               <div style={{display:"flex",justifyContent:"space-between"}}>
-                <span style={{fontSize:9,color:C.dim}}>znikanie</span>
-                <span style={{fontSize:9,color:C.text}}>{ttlLabel(forcedTTL)}</span>
+                <span style={{fontSize:9,color:C.dim}}>{t("createGroup.summaryTTL")}</span>
+                <span style={{fontSize:9,color:C.text}}>{ttlLabel(t,forcedTTL)}</span>
               </div>
             </div>
 
             <div style={{display:"flex",gap:8}}>
-              <button onClick={()=>setStep(2)} style={{flex:1,padding:"10px 0",background:"none",border:`1px solid ${C.border}`,borderRadius:3,cursor:"pointer",color:C.dim,fontSize:11,fontFamily:F}}>← WRÓĆ</button>
+              <button onClick={()=>setStep(2)} style={{flex:1,padding:"10px 0",background:"none",border:`1px solid ${C.border}`,borderRadius:3,cursor:"pointer",color:C.dim,fontSize:11,fontFamily:F}}>{t("createGroup.back")}</button>
               <button onClick={create} disabled={selected.length===0} style={{flex:2,padding:"10px 0",background:selected.length>0?C.greenFaint:"none",border:`1px solid ${selected.length>0?"rgba(0,255,135,0.3)":C.border}`,borderRadius:3,cursor:selected.length>0?"pointer":"not-allowed",color:selected.length>0?C.green:C.dim,fontSize:11,fontFamily:F,display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
                 <Ico name="users" size={12} color={selected.length>0?C.green:C.dim}/>
-                UTWÓRZ GRUPĘ
+                {t("createGroup.create")}
               </button>
             </div>
           </div>
@@ -1318,6 +1318,7 @@ function CreateGroupModal({contacts, onCreateGroup, onClose}) {
 
 // ─── MODAL: EDYCJA GRUPY ─────────────────────────────────────────────────────
 function EditGroupModal({group, onSave, onClose}) {
+  const {t}=useI18n();
   const [name,       setName]      = useState(group.name);
   const [visibility, setVis]       = useState(group.visibility||"PRIVATE");
   const [invPol,     setInvPol]    = useState(group.invitePolicy||"ADMINS_ONLY");
@@ -1326,7 +1327,7 @@ function EditGroupModal({group, onSave, onClose}) {
   const accentCol = visColor(visibility);
 
   const save = () => {
-    if (!name.trim()) { setNameErr("podaj nazwę grupy"); return; }
+    if (!name.trim()) { setNameErr(t("editGroup.nameErr")); return; }
     onSave({...group, name:name.trim(), visibility, invitePolicy:invPol, forcedTTL});
     onClose();
   };
@@ -1341,8 +1342,8 @@ function EditGroupModal({group, onSave, onClose}) {
               <Ico name="settings" size={16} color={C.green}/>
             </div>
             <div>
-              <div style={{fontSize:13,color:C.text}}>ustawienia grupy</div>
-              <div style={{fontSize:9,color:C.dim,marginTop:2}}>{group.name} · tylko ty to widzisz</div>
+              <div style={{fontSize:13,color:C.text}}>{t("editGroup.title")}</div>
+              <div style={{fontSize:9,color:C.dim,marginTop:2}}>{t("editGroup.subtitle",{name:group.name})}</div>
             </div>
           </div>
           <button onClick={onClose} style={{background:"none",border:"none",cursor:"pointer",display:"flex"}}><Ico name="x" size={18} color={C.dim}/></button>
@@ -1350,7 +1351,7 @@ function EditGroupModal({group, onSave, onClose}) {
 
         {/* Nazwa */}
         <div style={{marginBottom:18}}>
-          <div style={{fontSize:9,color:C.dim,letterSpacing:1,marginBottom:8}}>NAZWA GRUPY</div>
+          <div style={{fontSize:9,color:C.dim,letterSpacing:1,marginBottom:8}}>{t("editGroup.nameLabel")}</div>
           <input
             value={name} onChange={e=>{setName(e.target.value);setNameErr("");}}
             style={{width:"100%",background:C.bg,border:`1px solid ${nameErr?C.red:C.border}`,borderRadius:3,padding:"10px 12px",color:C.green,fontSize:14,fontFamily:F,outline:"none",letterSpacing:0.5,boxSizing:"border-box"}}
@@ -1361,25 +1362,25 @@ function EditGroupModal({group, onSave, onClose}) {
         <div style={{height:1,background:C.border,margin:"0 0 16px"}}/>
 
         {/* Widoczność */}
-        <div style={{fontSize:9,color:C.dim,letterSpacing:1,marginBottom:8}}>WIDOCZNOŚĆ GRUPY</div>
-        {VISIBILITY_OPTS.map(o=><RadioOpt key={o.val} opt={o} selected={visibility} onSelect={setVis} accent={o.color}/>)}
+        <div style={{fontSize:9,color:C.dim,letterSpacing:1,marginBottom:8}}>{t("editGroup.visibility")}</div>
+        {VISIBILITY_OPTS.map(o=><RadioOpt key={o.val} opt={locVis(t,o)} selected={visibility} onSelect={setVis} accent={o.color}/>)}
 
         <div style={{height:1,background:C.border,margin:"16px 0"}}/>
 
         {/* Polityka zaproszeń */}
-        <div style={{fontSize:9,color:C.dim,letterSpacing:1,marginBottom:8}}>KTO MOŻE ZAPRASZAĆ</div>
-        {INVITE_OPTS.map(o=><RadioOpt key={o.val} opt={o} selected={invPol} onSelect={setInvPol} accent={accentCol}/>)}
+        <div style={{fontSize:9,color:C.dim,letterSpacing:1,marginBottom:8}}>{t("editGroup.whoCanInvite")}</div>
+        {INVITE_OPTS.map(o=><RadioOpt key={o.val} opt={locInv(t,o)} selected={invPol} onSelect={setInvPol} accent={accentCol}/>)}
 
         <div style={{height:1,background:C.border,margin:"16px 0"}}/>
 
         {/* TTL */}
-        <div style={{fontSize:9,color:C.dim,letterSpacing:1,marginBottom:8}}>WYMUSZONE ZNIKANIE WIADOMOŚCI</div>
+        <div style={{fontSize:9,color:C.dim,letterSpacing:1,marginBottom:8}}>{t("editGroup.forcedTTL")}</div>
         <div style={{display:"flex",flexWrap:"wrap",gap:6,marginBottom:16}}>
           {TTL_OPTS.map(o=>{
             const isSel=String(forcedTTL)===String(o.val);
             return (
               <button key={String(o.val)} onClick={()=>setForcedTTL(o.val)} style={{padding:"5px 10px",borderRadius:2,background:isSel?C.greenFaint:"none",border:`1px solid ${isSel?"rgba(0,255,135,0.4)":C.border}`,cursor:"pointer",fontSize:9,color:isSel?C.green:C.dim,fontFamily:F}}>
-                {o.label}
+                {ttlLabel(t,o.val)}
               </button>
             );
           })}
@@ -1387,14 +1388,14 @@ function EditGroupModal({group, onSave, onClose}) {
 
         {/* Ostrzeżenie o zmianie widoczności */}
         <div style={{background:"rgba(255,180,0,0.05)",border:"1px solid rgba(255,180,0,0.2)",borderRadius:3,padding:"9px 12px",marginBottom:16}}>
-          <div style={{display:"flex",gap:6,marginBottom:4}}><Ico name="alert" size={11} color={C.yellow}/><span style={{fontSize:9,color:C.yellow,letterSpacing:1}}>PAMIĘTAJ</span></div>
-          <div style={{fontSize:9,color:C.dim,lineHeight:1.7}}>zmiana widoczności nie usuwa informacji którą już zobaczyli inni węzły w sieci. ukrycie grupy działa w pełni tylko gdy zastosowane od początku.</div>
+          <div style={{display:"flex",gap:6,marginBottom:4}}><Ico name="alert" size={11} color={C.yellow}/><span style={{fontSize:9,color:C.yellow,letterSpacing:1}}>{t("editGroup.rememberTitle")}</span></div>
+          <div style={{fontSize:9,color:C.dim,lineHeight:1.7}}>{t("editGroup.rememberDesc")}</div>
         </div>
 
         <div style={{display:"flex",gap:8}}>
-          <button onClick={onClose} style={{flex:1,padding:"10px 0",background:"none",border:`1px solid ${C.border}`,borderRadius:3,cursor:"pointer",color:C.dim,fontSize:11,fontFamily:F}}>ANULUJ</button>
+          <button onClick={onClose} style={{flex:1,padding:"10px 0",background:"none",border:`1px solid ${C.border}`,borderRadius:3,cursor:"pointer",color:C.dim,fontSize:11,fontFamily:F}}>{t("editGroup.cancel")}</button>
           <button onClick={save} style={{flex:2,padding:"10px 0",background:C.greenFaint,border:"1px solid rgba(0,255,135,0.3)",borderRadius:3,cursor:"pointer",color:C.green,fontSize:11,fontFamily:F,display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
-            <Ico name="check" size={12} color={C.green}/>ZAPISZ USTAWIENIA
+            <Ico name="check" size={12} color={C.green}/>{t("editGroup.save")}
           </button>
         </div>
       </div>
@@ -1402,8 +1403,30 @@ function EditGroupModal({group, onSave, onClose}) {
   );
 }
 
+// ─── PRZEŁĄCZNIK JĘZYKA (natywny select) ─────────────────────────────────────
+// Prosty <select> stylizowany istniejącymi zmiennymi C/F — bez dekoracji.
+function LanguageSelect({compact=false}) {
+  const {t,lang,setLang}=useI18n();
+  return (
+    <div style={{display:"flex",alignItems:"center",gap:6}}>
+      {!compact && <span style={{fontSize:9,color:C.dim,fontFamily:F,letterSpacing:0.8}}>{t("language.label")}</span>}
+      <select
+        aria-label={t("language.label")}
+        value={lang}
+        onChange={e=>setLang(e.target.value)}
+        style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:3,color:C.dim,fontSize:10,fontFamily:F,letterSpacing:0.4,padding:"4px 6px",outline:"none",cursor:"pointer"}}
+      >
+        {SUPPORTED_LANGUAGES.map(code=>(
+          <option key={code} value={code} style={{background:C.surface,color:C.text}}>{LANGUAGE_NAMES[code]}</option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
 // ─── SIDEBAR (full / mini) ───────────────────────────────────────────────────
 function Sidebar({contacts, groups, active, onSelect, onShowQR, onAddContact, onCreateGroup, mode, onToggle}) {
+  const {t}=useI18n();
   const [tab, setTab] = useState("contacts");
   const isMini = mode === "mini";
 
@@ -1411,7 +1434,7 @@ function Sidebar({contacts, groups, active, onSelect, onShowQR, onAddContact, on
   if (isMini) return (
     <div style={{width:52,flexShrink:0,background:C.surface,borderRight:`1px solid ${C.border}`,display:"flex",flexDirection:"column",height:"100%",alignItems:"center",overflow:"hidden"}}>
       {/* Toggle button */}
-      <button onClick={onToggle} title="Rozwiń panel" style={{width:"100%",padding:"14px 0",background:"none",border:"none",borderBottom:`1px solid ${C.border}`,cursor:"pointer",display:"flex",justifyContent:"center"}}>
+      <button onClick={onToggle} title={t("sidebar.expandPanel")} style={{width:"100%",padding:"14px 0",background:"none",border:"none",borderBottom:`1px solid ${C.border}`,cursor:"pointer",display:"flex",justifyContent:"center"}}>
         <Ico name="chevRight" size={16} color={C.green}/>
       </button>
 
@@ -1466,9 +1489,9 @@ function Sidebar({contacts, groups, active, onSelect, onShowQR, onAddContact, on
 
       {/* Akcje dole */}
       <div style={{width:"100%",borderTop:`1px solid ${C.border}`,padding:"6px 0",display:"flex",flexDirection:"column",alignItems:"center",gap:2}}>
-        <button onClick={onShowQR}    title="Twój QR"        style={miniBtn}><Ico name="qr"    size={14} color={C.green}/></button>
-        <button onClick={onAddContact} title="Dodaj kontakt" style={miniBtn}><Ico name="plus"  size={14} color={C.green}/></button>
-        <button onClick={onCreateGroup} title="Utwórz grupę" style={miniBtn}><Ico name="users" size={14} color={C.purple}/></button>
+        <button onClick={onShowQR}    title={t("sidebar.titleQR")}          style={miniBtn}><Ico name="qr"    size={14} color={C.green}/></button>
+        <button onClick={onAddContact} title={t("sidebar.titleAddContact")} style={miniBtn}><Ico name="plus"  size={14} color={C.green}/></button>
+        <button onClick={onCreateGroup} title={t("sidebar.titleCreateGroup")} style={miniBtn}><Ico name="users" size={14} color={C.purple}/></button>
       </div>
     </div>
   );
@@ -1482,15 +1505,15 @@ function Sidebar({contacts, groups, active, onSelect, onShowQR, onAddContact, on
             <Logo size={34}/>
             <div>
               <div style={{fontSize:12,color:C.green,fontFamily:F,letterSpacing:1}}>PHANTOM</div>
-              <div style={{fontSize:9,color:C.dim,fontFamily:F}}>p2p · tor · e2e</div>
+              <div style={{fontSize:9,color:C.dim,fontFamily:F}}>{t("brand.tagline")}</div>
             </div>
           </div>
           <div style={{display:"flex",gap:4}}>
-            <button onClick={onShowQR} title="Twój QR" style={{background:C.greenFaint,border:"1px solid rgba(0,255,135,0.2)",borderRadius:3,padding:"4px 5px",cursor:"pointer",display:"flex"}}>
+            <button onClick={onShowQR} title={t("sidebar.titleQR")} style={{background:C.greenFaint,border:"1px solid rgba(0,255,135,0.2)",borderRadius:3,padding:"4px 5px",cursor:"pointer",display:"flex"}}>
               <Ico name="qr" size={13} color={C.green}/>
             </button>
             {/* Button zwijania */}
-            <button onClick={onToggle} title="Zwiń panel" style={{background:"none",border:`1px solid ${C.border}`,borderRadius:3,padding:"4px 5px",cursor:"pointer",display:"flex"}}>
+            <button onClick={onToggle} title={t("sidebar.collapsePanel")} style={{background:"none",border:`1px solid ${C.border}`,borderRadius:3,padding:"4px 5px",cursor:"pointer",display:"flex"}}>
               <Ico name="chevLeft" size={13} color={C.dim}/>
             </button>
           </div>
@@ -1499,7 +1522,7 @@ function Sidebar({contacts, groups, active, onSelect, onShowQR, onAddContact, on
       </div>
 
       <div style={{display:"flex",borderBottom:`1px solid ${C.border}`}}>
-        {[["contacts","shield","KONTAKTY"],["groups","users","GRUPY"]].map(([id,ico,lbl])=>(
+        {[["contacts","shield",t("sidebar.tabContacts")],["groups","users",t("sidebar.tabGroups")]].map(([id,ico,lbl])=>(
           <button key={id} onClick={()=>setTab(id)} style={{flex:1,padding:"9px 0",background:"none",border:"none",borderBottom:tab===id?`2px solid ${C.green}`:"2px solid transparent",cursor:"pointer",color:tab===id?C.green:C.dim,fontSize:9,fontFamily:F,letterSpacing:1,display:"flex",alignItems:"center",justifyContent:"center",gap:5}}>
             <Ico name={ico} size={11} color={tab===id?C.green:C.dim}/>{lbl}
           </button>
@@ -1523,7 +1546,7 @@ function Sidebar({contacts, groups, active, onSelect, onShowQR, onAddContact, on
                   {c.unread>0&&<span style={{background:C.green,color:C.bg,fontSize:9,fontFamily:F,padding:"1px 5px",borderRadius:2,flexShrink:0}}>{c.unread}</span>}
                 </div>
                 <div style={{fontSize:9,color:C.dim,fontFamily:F,marginTop:2,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
-                  {shortOnion(c.onion)} · {c.lastSeen}
+                  {shortOnion(c.onion)} · {lastSeenLabel(t,c.lastSeen)}
                 </div>
               </div>
             </button>
@@ -1548,9 +1571,9 @@ function Sidebar({contacts, groups, active, onSelect, onShowQR, onAddContact, on
                   {g.unread>0&&<span style={{background:C.green,color:C.bg,fontSize:9,fontFamily:F,padding:"1px 5px",borderRadius:2,flexShrink:0}}>{g.unread}</span>}
                 </div>
                 <div style={{fontSize:9,color:C.dim,fontFamily:F,marginTop:2,display:"flex",alignItems:"center",gap:4}}>
-                  <span style={{color:vcol}}>{visLabel(g.visibility||"PRIVATE")}</span>
-                  <span>·</span><span>{g.memberIds.length} os.</span>
-                  {g.isFounder&&<span style={{color:C.green}}>· założyciel</span>}
+                  <span style={{color:vcol}}>{visLabel(t,g.visibility||"PRIVATE")}</span>
+                  <span>·</span><span>{t("sidebar.membersShort",{count:g.memberIds.length})}</span>
+                  {g.isFounder&&<span style={{color:C.green}}>· {t("sidebar.founder")}</span>}
                 </div>
               </div>
             </button>
@@ -1560,11 +1583,15 @@ function Sidebar({contacts, groups, active, onSelect, onShowQR, onAddContact, on
 
       <div style={{padding:8,borderTop:`1px solid ${C.border}`,display:"flex",flexDirection:"column",gap:5}}>
         <button onClick={onAddContact} style={{width:"100%",padding:"7px 0",background:C.greenFaint,border:"1px solid rgba(0,255,135,0.2)",borderRadius:3,cursor:"pointer",color:C.green,fontSize:10,fontFamily:F,letterSpacing:1,display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
-          <Ico name="plus" size={12} color={C.green}/>DODAJ KONTAKT
+          <Ico name="plus" size={12} color={C.green}/>{t("sidebar.addContact")}
         </button>
         <button onClick={onCreateGroup} style={{width:"100%",padding:"7px 0",background:"rgba(155,109,255,0.08)",border:"1px solid rgba(155,109,255,0.2)",borderRadius:3,cursor:"pointer",color:C.purple,fontSize:10,fontFamily:F,letterSpacing:1,display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
-          <Ico name="users" size={12} color={C.purple}/>UTWÓRZ GRUPĘ
+          <Ico name="users" size={12} color={C.purple}/>{t("sidebar.createGroup")}
         </button>
+        <div style={{height:1,background:C.border,margin:"3px 0"}}/>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"1px 2px"}}>
+          <LanguageSelect/>
+        </div>
       </div>
     </div>
   );
@@ -1573,6 +1600,7 @@ const miniBtn = {width:"100%",padding:"7px 0",background:"none",border:"none",cu
 
 // ─── PANEL PRAWY ─────────────────────────────────────────────────────────────
 function InfoPanel({chat, onPrivate, onEditGroup, onClose}) {
+  const {t}=useI18n();
   const isGroup = chat?.type==="group";
   const isPriv  = !!chat?.fromGroup;
   const members = isGroup ? (chat.memberIds||[]).map(id=>ALL_MEMBERS[id]).filter(Boolean) : [];
@@ -1580,15 +1608,15 @@ function InfoPanel({chat, onPrivate, onEditGroup, onClose}) {
   return (
     <div style={{width:200,flexShrink:0,background:C.surface,borderLeft:`1px solid ${C.border}`,display:"flex",flexDirection:"column",height:"100%",fontFamily:F}}>
       <div style={{padding:"12px 14px 10px",borderBottom:`1px solid ${C.border}`,flexShrink:0,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-        <div style={{fontSize:9,color:C.dim,letterSpacing:1}}>{isGroup?"CZŁONKOWIE":"SZCZEGÓŁY"}</div>
+        <div style={{fontSize:9,color:C.dim,letterSpacing:1}}>{isGroup?t("infoPanel.members"):t("infoPanel.details")}</div>
         <div style={{display:"flex",gap:4,alignItems:"center"}}>
           {isGroup&&chat.isFounder&&(
-            <button onClick={()=>onEditGroup(chat)} title="Ustawienia grupy" style={{background:"none",border:"none",cursor:"pointer",display:"flex",padding:2}}>
+            <button onClick={()=>onEditGroup(chat)} title={t("infoPanel.titleGroupSettings")} style={{background:"none",border:"none",cursor:"pointer",display:"flex",padding:2}}>
               <Ico name="settings" size={13} color={C.dim}/>
             </button>
           )}
           {onClose&&(
-            <button onClick={onClose} title="Zamknij panel" style={{background:"none",border:"none",cursor:"pointer",display:"flex",padding:2}}>
+            <button onClick={onClose} title={t("infoPanel.titleClosePanel")} style={{background:"none",border:"none",cursor:"pointer",display:"flex",padding:2}}>
               <Ico name="x" size={14} color={C.dim}/>
             </button>
           )}
@@ -1599,7 +1627,7 @@ function InfoPanel({chat, onPrivate, onEditGroup, onClose}) {
       {!chat && (
         <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:8,opacity:0.3}}>
           <Ico name="info" size={24} color={C.dim}/>
-          <span style={{fontSize:10,color:C.dim,textAlign:"center",lineHeight:1.5}}>wybierz kontakt<br/>lub grupę</span>
+          <span style={{fontSize:10,color:C.dim,textAlign:"center",lineHeight:1.5}}>{t("infoPanel.selectHint1")}<br/>{t("infoPanel.selectHint2")}</span>
         </div>
       )}
 
@@ -1610,16 +1638,16 @@ function InfoPanel({chat, onPrivate, onEditGroup, onClose}) {
           <div style={{padding:"10px 14px",borderBottom:`1px solid ${C.border}`}}>
             <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:6}}>
               <Ico name={visIcon(chat.visibility||"PRIVATE")} size={11} color={visColor(chat.visibility||"PRIVATE")}/>
-              <span style={{fontSize:10,color:visColor(chat.visibility||"PRIVATE"),fontFamily:F}}>{visLabel(chat.visibility||"PRIVATE")}</span>
+              <span style={{fontSize:10,color:visColor(chat.visibility||"PRIVATE"),fontFamily:F}}>{visLabel(t,chat.visibility||"PRIVATE")}</span>
             </div>
             <div style={{fontSize:9,color:C.dim,lineHeight:1.7}}>
-              <div>zaproszenia: {invLabel(chat.invitePolicy||"ADMINS_ONLY")}</div>
-              {chat.forcedTTL&&<div style={{color:C.yellow}}>znikanie: {ttlLabel(chat.forcedTTL)}</div>}
-              <div>epoch={chat.epoch} · {chat.memberIds?.length||0} os.</div>
+              <div>{t("infoPanel.invites",{policy:invLabel(t,chat.invitePolicy||"ADMINS_ONLY")})}</div>
+              {chat.forcedTTL&&<div style={{color:C.yellow}}>{t("infoPanel.disappear",{ttl:ttlLabel(t,chat.forcedTTL)})}</div>}
+              <div>{t("infoPanel.epochMembers",{epoch:chat.epoch,count:chat.memberIds?.length||0})}</div>
             </div>
             {chat.isFounder&&(
               <button onClick={()=>onEditGroup(chat)} style={{marginTop:8,width:"100%",padding:"5px 0",background:C.purpleFaint,border:"1px solid rgba(155,109,255,0.2)",borderRadius:2,cursor:"pointer",color:C.purple,fontSize:9,fontFamily:F,letterSpacing:0.8,display:"flex",alignItems:"center",justifyContent:"center",gap:5}}>
-                <Ico name="settings" size={10} color={C.purple}/>EDYTUJ USTAWIENIA
+                <Ico name="settings" size={10} color={C.purple}/>{t("infoPanel.editSettings")}
               </button>
             )}
           </div>
@@ -1628,7 +1656,7 @@ function InfoPanel({chat, onPrivate, onEditGroup, onClose}) {
             {members.map(m=><MemberBtn key={m.id} m={m} onPrivate={onPrivate}/>)}
           </div>
           <div style={{padding:"10px 14px",borderTop:`1px solid ${C.border}`}}>
-            <div style={{fontSize:9,color:C.faint,lineHeight:1.8}}>kliknij członka lub jego nick aby otworzyć prywatną rozmowę</div>
+            <div style={{fontSize:9,color:C.faint,lineHeight:1.8}}>{t("infoPanel.memberHint")}</div>
           </div>
         </div>
       )}
@@ -1637,8 +1665,8 @@ function InfoPanel({chat, onPrivate, onEditGroup, onClose}) {
         <div style={{flex:1,padding:14,overflowY:"auto"}}>
           {isPriv&&(
             <div style={{background:"rgba(155,109,255,0.07)",border:"1px solid rgba(155,109,255,0.18)",borderRadius:3,padding:"10px 12px",marginBottom:14}}>
-              <div style={{fontSize:9,color:C.purple,letterSpacing:1,marginBottom:4}}>KANAŁ PRYWATNY</div>
-              <div style={{fontSize:9,color:C.dim,lineHeight:1.7}}>niewidoczny dla grupy<br/><span style={{color:C.purple}}>{chat.fromGroup}</span></div>
+              <div style={{fontSize:9,color:C.purple,letterSpacing:1,marginBottom:4}}>{t("infoPanel.privateChannel")}</div>
+              <div style={{fontSize:9,color:C.dim,lineHeight:1.7}}>{t("infoPanel.invisibleForGroup")}<br/><span style={{color:C.purple}}>{chat.fromGroup}</span></div>
             </div>
           )}
           <div style={{background:C.bg,border:`1px solid ${C.border}`,borderRadius:4,padding:"16px 12px",marginBottom:16,textAlign:"center"}}>
@@ -1647,25 +1675,24 @@ function InfoPanel({chat, onPrivate, onEditGroup, onClose}) {
             </div>
             <div style={{fontSize:14,color:C.text,fontFamily:F,marginBottom:6}}>{chat.name}</div>
             <div style={{fontSize:9,color:chat.trust==="DIRECT"?C.green:C.yellow,letterSpacing:0.8}}>
-              {chat.trust==="DIRECT"?"● zaufany bezpośrednio":"◐ zaufany pośrednio"}
+              {chat.trust==="DIRECT"?t("infoPanel.trustDirect"):t("infoPanel.trustIndirect")}
             </div>
           </div>
           <div style={{marginBottom:14}}>
-            <div style={{fontSize:9,color:C.dim,letterSpacing:1,marginBottom:5}}>STATUS</div>
+            <div style={{fontSize:9,color:C.dim,letterSpacing:1,marginBottom:5}}>{t("infoPanel.status")}</div>
             <div style={{display:"flex",alignItems:"center",gap:6}}>
               <div style={{width:6,height:6,borderRadius:"50%",background:chat.online?C.green:C.faint}}/>
-              <span style={{fontSize:10,color:C.text}}>{chat.online?"online":`ostatnio ${chat.lastSeen}`}</span>
+              <span style={{fontSize:10,color:C.text}}>{chat.online?t("infoPanel.online"):t("infoPanel.lastSeen",{time:lastSeenLabel(t,chat.lastSeen)})}</span>
             </div>
           </div>
           <div style={{marginBottom:14}}>
-            <div style={{fontSize:9,color:C.dim,letterSpacing:1,marginBottom:5}}>SZYFROWANIE</div>
+            <div style={{fontSize:9,color:C.dim,letterSpacing:1,marginBottom:5}}>{t("infoPanel.encryption")}</div>
             <div style={{fontSize:9,color:C.text,lineHeight:1.9}}>
-              <div>· signal protocol</div><div>· double ratchet</div>
-              <div>· forward secrecy</div><div>· tor hidden service</div>
+              {t("infoPanel.encryptionList").map((x,i)=><div key={i}>{x}</div>)}
             </div>
           </div>
           <div style={{marginBottom:14}}>
-            <div style={{fontSize:9,color:C.dim,letterSpacing:1,marginBottom:5}}>ADRES TOR</div>
+            <div style={{fontSize:9,color:C.dim,letterSpacing:1,marginBottom:5}}>{t("infoPanel.torAddress")}</div>
             <div style={{fontSize:9,color:C.green,wordBreak:"break-all",lineHeight:1.6,letterSpacing:0.3}}>{chat.onion}</div>
           </div>
         </div>
@@ -1673,8 +1700,8 @@ function InfoPanel({chat, onPrivate, onEditGroup, onClose}) {
 
       <div style={{padding:12,borderTop:`1px solid ${C.border}`,flexShrink:0}}>
         <div style={{background:"rgba(255,180,0,0.05)",border:"1px solid rgba(255,180,0,0.18)",borderRadius:3,padding:"9px 11px"}}>
-          <div style={{display:"flex",gap:5,marginBottom:4}}><Ico name="alert" size={11} color={C.yellow}/><span style={{fontSize:9,color:C.yellow,letterSpacing:1}}>PAMIĘTAJ</span></div>
-          <div style={{fontSize:9,color:C.dim,lineHeight:1.7}}>szyfrowanie chroni treść. bezpieczeństwo urządzenia zależy od ciebie.</div>
+          <div style={{display:"flex",gap:5,marginBottom:4}}><Ico name="alert" size={11} color={C.yellow}/><span style={{fontSize:9,color:C.yellow,letterSpacing:1}}>{t("infoPanel.rememberTitle")}</span></div>
+          <div style={{fontSize:9,color:C.dim,lineHeight:1.7}}>{t("infoPanel.rememberDesc")}</div>
         </div>
       </div>
     </div>
@@ -1682,12 +1709,13 @@ function InfoPanel({chat, onPrivate, onEditGroup, onClose}) {
 }
 
 function MemberBtn({m,onPrivate}) {
+  const {t}=useI18n();
   const [hov,setHov]=useState(false);
   return (
     <button
       onMouseEnter={()=>setHov(true)} onMouseLeave={()=>setHov(false)}
       onClick={()=>onPrivate(m)}
-      title="Otwórz prywatną rozmowę"
+      title={t("memberBtn.title")}
       style={{width:"100%",textAlign:"left",padding:"9px 14px",background:hov?C.purpleFaint:"none",border:"none",borderLeft:hov?`2px solid ${C.purple}`:"2px solid transparent",cursor:"pointer",display:"flex",alignItems:"center",gap:9,transition:"all 0.15s"}}>
       <div style={{position:"relative",flexShrink:0}}>
         <div style={{width:30,height:30,borderRadius:3,background:C.bg,border:`1px solid ${C.border}`,display:"flex",alignItems:"center",justifyContent:"center"}}>
@@ -1697,7 +1725,7 @@ function MemberBtn({m,onPrivate}) {
       </div>
       <div style={{flex:1,minWidth:0}}>
         <div style={{fontSize:11,color:hov?C.purple:C.text,fontFamily:F,transition:"color 0.15s",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{m.name}</div>
-        <div style={{fontSize:9,color:C.dim,fontFamily:F,marginTop:1}}>{m.online?"online":m.lastSeen}</div>
+        <div style={{fontSize:9,color:C.dim,fontFamily:F,marginTop:1}}>{m.online?t("memberBtn.online"):lastSeenLabel(t,m.lastSeen)}</div>
       </div>
       {hov&&<Ico name="lock" size={11} color={C.purple}/>}
     </button>
@@ -1706,12 +1734,13 @@ function MemberBtn({m,onPrivate}) {
 
 // ─── MOBILE BOTTOM NAV ───────────────────────────────────────────────────────
 function BottomNav({tab, onTab, onAddContact, onCreateGroup, onShowQR}) {
+  const {t}=useI18n();
   const items = [
-    {id:"contacts", icon:"shield", label:"Kontakty"},
-    {id:"groups",   icon:"users",  label:"Grupy"},
-    {id:"add",      icon:"plus",   label:"Dodaj",   action:onAddContact},
-    {id:"create",   icon:"users",  label:"Nowa gr.", action:onCreateGroup, color:C.purple},
-    {id:"qr",       icon:"qr",     label:"QR",      action:onShowQR},
+    {id:"contacts", icon:"shield", label:t("nav.contacts")},
+    {id:"groups",   icon:"users",  label:t("nav.groups")},
+    {id:"add",      icon:"plus",   label:t("nav.add"),   action:onAddContact},
+    {id:"create",   icon:"users",  label:t("nav.newGroup"), action:onCreateGroup, color:C.purple},
+    {id:"qr",       icon:"qr",     label:t("nav.qr"),      action:onShowQR},
   ];
   return (
     <div style={{position:"fixed",bottom:0,left:0,right:0,background:C.surface,borderTop:`1px solid ${C.border}`,display:"flex",zIndex:50,height:56}}>
@@ -1731,6 +1760,7 @@ function BottomNav({tab, onTab, onAddContact, onCreateGroup, onShowQR}) {
 
 // ─── MOBILE INFO DRAWER ──────────────────────────────────────────────────────
 function InfoDrawer({chat, onPrivate, onEditGroup, onClose}) {
+  const {t}=useI18n();
   if (!chat) return null;
   const isGroup = chat.type==="group";
   const isPriv  = !!chat.fromGroup;
@@ -1759,7 +1789,7 @@ function InfoDrawer({chat, onPrivate, onEditGroup, onClose}) {
             <div>
               <div style={{fontSize:13,color:C.text}}>{chat.name}</div>
               <div style={{fontSize:9,color:C.dim,marginTop:2}}>
-                {isGroup ? `${chat.memberIds?.length||0} członków · epoch=${chat.epoch}` : shortOnion(chat.onion)}
+                {isGroup ? t("chat.membersEpoch",{count:chat.memberIds?.length||0,epoch:chat.epoch}) : shortOnion(chat.onion)}
               </div>
             </div>
           </div>
@@ -1775,21 +1805,21 @@ function InfoDrawer({chat, onPrivate, onEditGroup, onClose}) {
               <div style={{background:C.bg,border:`1px solid ${C.border}`,borderRadius:4,padding:"10px 12px",marginBottom:12}}>
                 <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:6}}>
                   <Ico name={visIcon(chat.visibility||"PRIVATE")} size={11} color={visColor(chat.visibility||"PRIVATE")}/>
-                  <span style={{fontSize:10,color:visColor(chat.visibility||"PRIVATE")}}>{visLabel(chat.visibility||"PRIVATE")}</span>
+                  <span style={{fontSize:10,color:visColor(chat.visibility||"PRIVATE")}}>{visLabel(t,chat.visibility||"PRIVATE")}</span>
                 </div>
                 <div style={{fontSize:9,color:C.dim,lineHeight:1.8}}>
-                  <div>zaproszenia: {invLabel(chat.invitePolicy||"ADMINS_ONLY")}</div>
-                  {chat.forcedTTL&&<div style={{color:C.yellow}}>znikanie: {ttlLabel(chat.forcedTTL)}</div>}
+                  <div>{t("drawer.invites",{policy:invLabel(t,chat.invitePolicy||"ADMINS_ONLY")})}</div>
+                  {chat.forcedTTL&&<div style={{color:C.yellow}}>{t("drawer.disappear",{ttl:ttlLabel(t,chat.forcedTTL)})}</div>}
                 </div>
                 {chat.isFounder&&(
                   <button onClick={()=>{onEditGroup(chat);onClose();}} style={{marginTop:8,width:"100%",padding:"6px 0",background:C.purpleFaint,border:"1px solid rgba(155,109,255,0.2)",borderRadius:2,cursor:"pointer",color:C.purple,fontSize:10,fontFamily:F,display:"flex",alignItems:"center",justifyContent:"center",gap:5}}>
-                    <Ico name="settings" size={11} color={C.purple}/>EDYTUJ USTAWIENIA
+                    <Ico name="settings" size={11} color={C.purple}/>{t("drawer.editSettings")}
                   </button>
                 )}
               </div>
-              <div style={{fontSize:9,color:C.dim,letterSpacing:1,marginBottom:8}}>CZŁONKOWIE</div>
+              <div style={{fontSize:9,color:C.dim,letterSpacing:1,marginBottom:8}}>{t("drawer.members")}</div>
               {members.map(m=><MemberBtn key={m.id} m={m} onPrivate={(member)=>{onPrivate(member);onClose();}}/>)}
-              <div style={{fontSize:9,color:C.faint,lineHeight:1.8,marginTop:8,paddingBottom:16}}>dotknij członka aby otworzyć prywatną rozmowę</div>
+              <div style={{fontSize:9,color:C.faint,lineHeight:1.8,marginTop:8,paddingBottom:16}}>{t("drawer.memberHint")}</div>
             </>
           )}
 
@@ -1797,13 +1827,13 @@ function InfoDrawer({chat, onPrivate, onEditGroup, onClose}) {
           {!isGroup && (
             <>
               {isPriv&&<div style={{background:"rgba(155,109,255,0.07)",border:"1px solid rgba(155,109,255,0.18)",borderRadius:3,padding:"10px 12px",marginBottom:12}}>
-                <div style={{fontSize:9,color:C.purple,letterSpacing:1,marginBottom:3}}>KANAŁ PRYWATNY</div>
-                <div style={{fontSize:9,color:C.dim}}>niewidoczny dla grupy <span style={{color:C.purple}}>{chat.fromGroup}</span></div>
+                <div style={{fontSize:9,color:C.purple,letterSpacing:1,marginBottom:3}}>{t("drawer.privateChannel")}</div>
+                <div style={{fontSize:9,color:C.dim}}>{t("drawer.invisibleForGroup")} <span style={{color:C.purple}}>{chat.fromGroup}</span></div>
               </div>}
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:12}}>
                 {[
-                  ["status",    chat.online?"online":`ostat. ${chat.lastSeen}`, chat.online?C.green:C.dim],
-                  ["zaufanie",  chat.trust==="DIRECT"?"bezpośrednie":"pośrednie", chat.trust==="DIRECT"?C.green:C.yellow],
+                  [t("drawer.status"),    chat.online?t("memberBtn.online"):t("drawer.lastSeenShort",{time:lastSeenLabel(t,chat.lastSeen)}), chat.online?C.green:C.dim],
+                  [t("drawer.trust"),  chat.trust==="DIRECT"?t("drawer.trustDirect"):t("drawer.trustIndirect"), chat.trust==="DIRECT"?C.green:C.yellow],
                 ].map(([l,v,col])=>(
                   <div key={l} style={{background:C.bg,border:`1px solid ${C.border}`,borderRadius:3,padding:"8px 10px"}}>
                     <div style={{fontSize:8,color:C.dim,letterSpacing:1,marginBottom:3}}>{l.toUpperCase()}</div>
@@ -1812,12 +1842,12 @@ function InfoDrawer({chat, onPrivate, onEditGroup, onClose}) {
                 ))}
               </div>
               <div style={{background:C.bg,border:`1px solid ${C.border}`,borderRadius:3,padding:"8px 10px",marginBottom:12}}>
-                <div style={{fontSize:8,color:C.dim,letterSpacing:1,marginBottom:4}}>ADRES TOR</div>
+                <div style={{fontSize:8,color:C.dim,letterSpacing:1,marginBottom:4}}>{t("drawer.torAddress")}</div>
                 <div style={{fontSize:9,color:C.green,wordBreak:"break-all",lineHeight:1.6}}>{chat.onion}</div>
               </div>
               <div style={{background:C.bg,border:`1px solid ${C.border}`,borderRadius:3,padding:"8px 10px",paddingBottom:16}}>
-                <div style={{fontSize:8,color:C.dim,letterSpacing:1,marginBottom:4}}>SZYFROWANIE</div>
-                {["signal protocol","double ratchet","forward secrecy","tor hidden service"].map(t=><div key={t} style={{fontSize:9,color:C.text,lineHeight:1.9}}>· {t}</div>)}
+                <div style={{fontSize:8,color:C.dim,letterSpacing:1,marginBottom:4}}>{t("drawer.encryption")}</div>
+                {t("drawer.encryptionList").map((item,i)=><div key={i} style={{fontSize:9,color:C.text,lineHeight:1.9}}>· {item}</div>)}
               </div>
             </>
           )}
@@ -1829,6 +1859,7 @@ function InfoDrawer({chat, onPrivate, onEditGroup, onClose}) {
 
 // ─── GŁÓWNA APLIKACJA ─────────────────────────────────────────────────────────
 export default function App() {
+  const {t}=useI18n();
   const [booting,     setBooting]    = useState(true);
   const [chat,        setChat]       = useState(null);
   const [showQR,      setShowQR]     = useState(false);
@@ -1950,7 +1981,10 @@ export default function App() {
                   <Logo size={28}/>
                   <div style={{fontSize:11,color:C.green,fontFamily:F,letterSpacing:1}}>PHANTOM</div>
                 </div>
-                <TorDot/>
+                <div style={{display:"flex",alignItems:"center",gap:10}}>
+                  <LanguageSelect compact/>
+                  <TorDot/>
+                </div>
               </div>
 
               {/* Lista */}
@@ -1977,8 +2011,8 @@ export default function App() {
                       </div>
                       <div style={{fontSize:10,color:C.dim,fontFamily:F,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
                         {isGrp
-                          ? <><span style={{color:vcol}}>{visLabel(item.visibility||"PRIVATE")}</span> · {item.memberIds.length} os.{item.isFounder?" · założyciel":""}</>
-                          : <>{shortOnion(item.onion)} · {item.lastSeen}</>
+                          ? <><span style={{color:vcol}}>{visLabel(t,item.visibility||"PRIVATE")}</span> · {t("sidebar.membersShort",{count:item.memberIds.length})}{item.isFounder?" · "+t("sidebar.founder"):""}</>
+                          : <>{shortOnion(item.onion)} · {lastSeenLabel(t,item.lastSeen)}</>
                         }
                       </div>
                     </div>
