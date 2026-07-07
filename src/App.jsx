@@ -1585,10 +1585,12 @@ function Sidebar({contacts, groups, active, onSelect, onShowQR, onAddContact, on
         <button onClick={onCreateGroup} style={{width:"100%",padding:"7px 0",background:"rgba(155,109,255,0.08)",border:"1px solid rgba(155,109,255,0.2)",borderRadius:3,cursor:"pointer",color:C.purple,fontSize:10,fontFamily:F,letterSpacing:1,display:"flex",alignItems:"center",justifyContent:"center",gap:6}}>
           <Ico name="users" size={12} color={C.purple}/>{t("sidebar.createGroup")}
         </button>
+        {/* Przełącznik języka ukryty w UI — logika i18n bez zmian. Odkomentuj, by przywrócić.
         <div style={{height:1,background:C.border,margin:"3px 0"}}/>
         <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"1px 2px"}}>
           <LanguageSelect/>
         </div>
+        */}
       </div>
     </div>
   );
@@ -1979,7 +1981,9 @@ export default function App() {
                   <div style={{fontSize:11,color:C.green,fontFamily:F,letterSpacing:1}}>PHANTOM</div>
                 </div>
                 <div style={{display:"flex",alignItems:"center",gap:10}}>
+                  {/* Przełącznik języka ukryty w UI — logika i18n bez zmian. Odkomentuj, by przywrócić.
                   <LanguageSelect/>
+                  */}
                   <TorDot/>
                 </div>
               </div>
