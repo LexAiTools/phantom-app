@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useI18n } from "./i18n/index.jsx";
-import { SUPPORTED_LANGUAGES, LANGUAGE_NAMES } from "./i18n/config.js";
+import { SUPPORTED_LANGUAGES } from "./i18n/config.js";
 
 // ─── STAŁE ────────────────────────────────────────────────────────────────────
 const C = {
@@ -1405,22 +1405,19 @@ function EditGroupModal({group, onSave, onClose}) {
 
 // ─── PRZEŁĄCZNIK JĘZYKA (natywny select) ─────────────────────────────────────
 // Prosty <select> stylizowany istniejącymi zmiennymi C/F — bez dekoracji.
-function LanguageSelect({compact=false}) {
+function LanguageSelect() {
   const {t,lang,setLang}=useI18n();
   return (
-    <div style={{display:"flex",alignItems:"center",gap:6}}>
-      {!compact && <span style={{fontSize:9,color:C.dim,fontFamily:F,letterSpacing:0.8}}>{t("language.label")}</span>}
-      <select
-        aria-label={t("language.label")}
-        value={lang}
-        onChange={e=>setLang(e.target.value)}
-        style={{background:C.surface,border:`1px solid ${C.border}`,borderRadius:3,color:C.dim,fontSize:10,fontFamily:F,letterSpacing:0.4,padding:"4px 6px",outline:"none",cursor:"pointer"}}
-      >
-        {SUPPORTED_LANGUAGES.map(code=>(
-          <option key={code} value={code} style={{background:C.surface,color:C.text}}>{LANGUAGE_NAMES[code]}</option>
-        ))}
-      </select>
-    </div>
+    <select
+      aria-label={t("language.label")}
+      value={lang}
+      onChange={e=>setLang(e.target.value)}
+      style={{appearance:"none",WebkitAppearance:"none",MozAppearance:"none",background:"transparent",border:"none",outline:"none",color:C.dim,fontSize:10,fontFamily:F,letterSpacing:0.8,padding:0,margin:0,cursor:"pointer"}}
+    >
+      {SUPPORTED_LANGUAGES.map(code=>(
+        <option key={code} value={code} style={{background:C.surface,color:C.text}}>{code.toUpperCase()}</option>
+      ))}
+    </select>
   );
 }
 
@@ -1982,7 +1979,7 @@ export default function App() {
                   <div style={{fontSize:11,color:C.green,fontFamily:F,letterSpacing:1}}>PHANTOM</div>
                 </div>
                 <div style={{display:"flex",alignItems:"center",gap:10}}>
-                  <LanguageSelect compact/>
+                  <LanguageSelect/>
                   <TorDot/>
                 </div>
               </div>
